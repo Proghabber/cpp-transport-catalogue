@@ -9,7 +9,7 @@ void TransportCatalogue::AddStop(const std::string& id ,double lat, double lag){
          
 }
 
-void TransportCatalogue::AddBus(const std::string& id, std::vector<std::string_view>stops){
+void TransportCatalogue::AddBus(const std::string& id, const std::vector<std::string_view>& stops){
     std::vector<std::string> st;   
     for (auto& stop:stops){
         if (stops_ptr_.count(stop)){

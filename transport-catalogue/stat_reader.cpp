@@ -36,7 +36,9 @@ void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string
     output<<std::endl;
 }
 
-void ReturnRsult(size_t lines, TransportCatalogue& catalogue, std::ostream& output, std::istream& input ){
+void ReturnRsult(TransportCatalogue& catalogue, std::ostream& output, std::istream& input ){
+    size_t lines;
+    input >> lines >> std::ws;
     for (size_t i = 0; i < lines; ++i) {
         std::string line;
         getline(input, line);

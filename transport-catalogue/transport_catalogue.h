@@ -49,7 +49,7 @@ class TransportCatalogue {
 	public:
 	
 	void AddStop(const std::string& id, double lat, double lag);
-	void AddBus(const std::string& id, std::vector<std::string_view> stops);
+	void AddBus(const std::string& id, const std::vector<std::string_view>& stops);
 	InfoBus CountStation(std::string_view id ) const;
 	InfoBus ReturnBus(std::string_view id)const;
 	void BusForStop(std::string_view id );

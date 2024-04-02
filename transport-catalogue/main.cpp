@@ -16,17 +16,13 @@ int main() {
         //теперь возложена на InputReader. А вывод информации возложен на функциях из  namespace utility.
         //Что более пригодно для проведения юнит тестов если, такие понадобятся.
         using namespace input_pars;
-        size_t base_request_count;//Врятли будет столько запросов, но все возможно.
-        cin >> base_request_count >> ws;
-        InputReader reader;
-        reader.ReadingLines(base_request_count, catalogue, cin);
+        InputReader reader;//имелись ввиду вызовы cin и  cout?
+        reader.ReadingLines(catalogue, std::cin);
 
     }
     {
         using namespace utility;
-        size_t stat_request_count;
-        cin >> stat_request_count >> ws;
-        ReturnRsult(stat_request_count, catalogue, cout, cin);
+        ReturnRsult(catalogue, std::cout, std::cin);
     }
     
     
