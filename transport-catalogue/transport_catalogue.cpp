@@ -27,7 +27,7 @@ void TransportCatalogue::BusForStop(std::string_view id){
      }
 }
 
-BusCounted TransportCatalogue::CountStation(std::string_view id ) const{
+ InfoBus TransportCatalogue::CountStation(std::string_view id ) const{
 
     int count = 0;
     size_t amount = bus_ptr_.at(id)->size();
@@ -55,8 +55,8 @@ BusCounted TransportCatalogue::CountStation(std::string_view id ) const{
     return {amount, amount-doubl, distance};
 }
 
-BusCounted TransportCatalogue::ReturnBus(std::string_view id) const {
-    BusCounted ret;
+ InfoBus TransportCatalogue::ReturnBus(std::string_view id) const {
+     InfoBus ret;
     if (!bus_ptr_.count(id)){ 
         return ret;
     }
@@ -64,19 +64,19 @@ BusCounted TransportCatalogue::ReturnBus(std::string_view id) const {
     return ret;
 }
 
-AllBussForStop  TransportCatalogue::ReturnStop(std::string_view id ) const{
-    AllBussForStop rez;
-
+std::set<std::string>  TransportCatalogue::ReturnStop(std::string_view id ) const{
+    std::set<std::string> rez;
     if (!bases_for_stops_.count(std::string(id))){
         if (stops_ptr_.count(std::string(id))){
-            rez.reqest="emty";
+            rez.insert("no buses");
         } else {
-            rez.reqest = "not answer";
+            rez.insert("not found"); 
         }     
     } else {
         std::set<std::string_view> collect = bases_for_stops_.at(std::string(id));
-             rez.reqest = "full";
-             rez.collect = std::move(collect);
+             for (std::string_view bus: collect){
+                rez.insert(std::string(bus));
+             }
     }
     return rez;
 }

@@ -12,11 +12,11 @@ int main() {
    
 
     {
-        //не совсем понял что требеутся , но  вроде отвецтвенность за заполнение класса TransportCatalogue
-        //теперь возложена на InputReader. А вывод информации возложен на функциях  namespace utility.
+        //не совсем понял что требеутся , но  вроде ответственность за заполнение класса TransportCatalogue
+        //теперь возложена на InputReader. А вывод информации возложен на функциях из  namespace utility.
         //Что более пригодно для проведения юнит тестов если, такие понадобятся.
         using namespace input_pars;
-        size_t base_request_count;
+        size_t base_request_count;//Врятли будет столько запросов, но все возможно.
         cin >> base_request_count >> ws;
         InputReader reader;
         reader.ReadingLines(base_request_count, catalogue, cin);

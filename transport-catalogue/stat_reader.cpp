@@ -4,7 +4,7 @@
 namespace utility{
 
 void PrintBus(const TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view rigth, std::ostream& output  ){
-    BusCounted rez;
+     InfoBus rez;
     rez = tansport_catalogue.ReturnBus(rigth);
     if (!rez.IsEmpty()){
             output<<left<<" "<<rigth<<": "<<rez.amount<<" stops on route, "<<rez.unique<<" unique stops, "<<rez.length<<" route length";
@@ -15,18 +15,11 @@ void PrintBus(const TransportCatalogue& tansport_catalogue, std::string_view lef
 }
 
 void PrintStop(const TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view rigth, std::ostream& output  ){
-    AllBussForStop  answer =tansport_catalogue.ReturnStop(rigth);
+    std::set<std::string>  answer =tansport_catalogue.ReturnStop(rigth);
         output<<left<<" "<<rigth<<":";
-        if (answer.reqest == "not answer"){
-            output<<" not found";
-        } else if (answer.reqest == "emty"){
-            output<< " no buses";
-        } else if (answer.reqest == "full"){
-            output<<" buses";
-            for (auto s : answer.collect){
+            for (std::string s : answer){
                 output<<" "<<s;
             }
-        }
 }
 
 void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,

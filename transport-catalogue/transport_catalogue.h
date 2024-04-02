@@ -20,13 +20,7 @@ namespace catalogue{
 
 	};
 
-	struct AllBussForStop{
-		std::string reqest;
-		std::set<std::string_view> collect;
-	};
-	
-
-	struct BusCounted{
+	struct  InfoBus{
 		size_t amount=0;
 		size_t unique=0;
 		double length=0;
@@ -56,10 +50,10 @@ class TransportCatalogue {
 	
 	void AddStop(const std::string& id, double lat, double lag);
 	void AddBus(const std::string& id, std::vector<std::string_view> stops);
-	BusCounted CountStation(std::string_view id ) const;
-	BusCounted ReturnBus(std::string_view id)const;
+	InfoBus CountStation(std::string_view id ) const;
+	InfoBus ReturnBus(std::string_view id)const;
 	void BusForStop(std::string_view id );
-	AllBussForStop  ReturnStop(std::string_view id )const;
+	std::set<std::string>  ReturnStop(std::string_view id )const;
 
 };
 }
