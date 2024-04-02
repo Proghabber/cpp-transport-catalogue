@@ -126,4 +126,14 @@ void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) 
         }
      }
 }
+
+void InputReader::ReadingLines(size_t lines, TransportCatalogue& catalogue, std::istream& inputput ){
+    for (size_t i = 0; i < lines; ++i) {
+            std::string line;
+            getline(inputput, line);
+            ParseLine(line);
+        }
+    ApplyCommands(catalogue);
+}
+
 }

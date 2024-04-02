@@ -54,8 +54,8 @@ class TransportCatalogue {
 	std::unordered_map<std::string,std::set<std::string_view>> bases_for_stops_;  //хранит коллекцию маршрутов на которых есть остановка
 	public:
 	
-	void AddStop(std::string id , double lat, double lag);
-	void AddBus(std::string id, std::vector<std::string_view> stops);
+	void AddStop(const std::string& id, double lat, double lag);
+	void AddBus(const std::string& id, std::vector<std::string_view> stops);
 	BusCounted CountStation(std::string_view id ) const;
 	BusCounted ReturnBus(std::string_view id)const;
 	void BusForStop(std::string_view id );

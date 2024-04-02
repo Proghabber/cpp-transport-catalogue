@@ -3,13 +3,13 @@
 
 
 namespace catalogue{
-void TransportCatalogue::AddStop(std::string id ,double lat, double lag){
+void TransportCatalogue::AddStop(const std::string& id ,double lat, double lag){
     stops_.push_back({id, lat, lag});
     stops_ptr_[stops_.back().name] = &stops_.back();
          
 }
 
-void TransportCatalogue::AddBus(std::string id, std::vector<std::string_view>stops){
+void TransportCatalogue::AddBus(const std::string& id, std::vector<std::string_view>stops){
     std::vector<std::string> st;   
     for (auto& stop:stops){
         if (stops_ptr_.count(stop)){

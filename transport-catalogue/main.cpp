@@ -9,25 +9,25 @@ using namespace std;
 int main() {
     TransportCatalogue catalogue;
 
-    int base_request_count;
-    cin >> base_request_count >> ws;
+   
 
     {
+        //не совсем понял что требеутся , но  вроде отвецтвенность за заполнение класса TransportCatalogue
+        //теперь возложена на InputReader. А вывод информации возложен на функциях  namespace utility.
+        //Что более пригодно для проведения юнит тестов если, такие понадобятся.
         using namespace input_pars;
+        size_t base_request_count;
+        cin >> base_request_count >> ws;
         InputReader reader;
-        for (int i = 0; i < base_request_count; ++i) {
-            string line;
-            getline(cin, line);
-            reader.ParseLine(line);
-        }
-        reader.ApplyCommands(catalogue);
+        reader.ReadingLines(base_request_count, catalogue, cin);
+
     }
-    using namespace utility;
-    int stat_request_count;
-    cin >> stat_request_count >> ws;
-    for (int i = 0; i < stat_request_count; ++i) {
-        string line;
-        getline(cin, line);
-        ParseAndPrintStat(catalogue, line, cout);
+    {
+        using namespace utility;
+        size_t stat_request_count;
+        cin >> stat_request_count >> ws;
+        ReturnRsult(stat_request_count, catalogue, cout, cin);
     }
+    
+    
 }
