@@ -7,8 +7,11 @@ void PrintBus(const TransportCatalogue& tansport_catalogue, std::string_view lef
      InfoBus rez;
     rez = tansport_catalogue.ReturnBus(rigth);
     if (!rez.IsEmpty()){
-            output<<left<<" "<<rigth<<": "<<rez.amount<<" stops on route, "<<rez.unique<<" unique stops, "<<rez.length<<" route length";
+            double distance =tansport_catalogue.CountDist(rigth);
+            double curvature= distance/rez.length;
+            output<<left<<" "<<rigth<<": "<<rez.amount<<" stops on route, "<<rez.unique<<" unique stops, "<<distance<<" route length, "<<curvature<<" curvature" ;
     } else {
+        
         output<<left<<" "<<rigth<<": not found";
     }
 
@@ -17,9 +20,12 @@ void PrintBus(const TransportCatalogue& tansport_catalogue, std::string_view lef
 void PrintStop(const TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view rigth, std::ostream& output  ){
     std::set<std::string>  answer =tansport_catalogue.ReturnStop(rigth);
         output<<left<<" "<<rigth<<":";
-            for (std::string s : answer){
-                output<<" "<<s;
-            }
+        if(!answer.count("not found") && !answer.count("no buses")){
+            output<<" buses";
+        }
+        for (std::string s : answer){
+            output<<" "<<s;
+        }
 }
 
 void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,
@@ -27,7 +33,8 @@ void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string
     std::string_view answer;                  
     size_t pos = request.find(' '); 
     std::string_view left = request.substr(0,pos);    
-    std::string_view rigth = request.substr(pos+1);    
+    std::string_view rigth = request.substr(pos+1);
+
     if (left == "Bus"){
         PrintBus(tansport_catalogue, left, rigth, output);    
     } else if (left == "Stop"){
