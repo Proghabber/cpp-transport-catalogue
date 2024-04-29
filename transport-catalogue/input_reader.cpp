@@ -11,10 +11,10 @@ namespace input_pars{
 using namespace geo_math;
 namespace parsers{
 
-size_t RetPosSymbol(std::string_view str, size_t pos, int step, char symbol ){
+size_t RetPosSymbol(std::string_view str, size_t pos, int step, char symbol){
     size_t start = pos;
-    for(int i=0; i < step; i++){
-        start=str.find(symbol,start);
+    for(int i = 0; i < step; i++){
+        start = str.find(symbol, start);
         if(start == str.npos){
             return str.npos;
         }
@@ -25,12 +25,13 @@ size_t RetPosSymbol(std::string_view str, size_t pos, int step, char symbol ){
     return start;
 }
 
-std::optional<std::vector<std::pair<std::string_view, int>>> ParserDistance(std::string_view str){
+std::unordered_map<std::string_view, int> ParseDistances(std::string_view str){
     //возможно необходимо будет поделить на отдельные функции и упростить
     size_t pos = 0;
     std::vector<size_t> poses;
     std::vector<size_t> counts;
     std::vector<std::string_view> words;
+    std::unordered_map<std::string_view, int> distance_to_next; 
     while (pos != str.npos){
         pos = RetPosSymbol(str, pos, 2, ',');
         poses.push_back(pos);
@@ -42,10 +43,10 @@ std::optional<std::vector<std::pair<std::string_view, int>>> ParserDistance(std:
                 count = RetPosSymbol(str, count, 1, ',');           
         }
         counts.push_back(str.npos);
-        std::vector<std::pair<std::string_view, int>> dist;
+        
         for (size_t i = 0;i < counts.size(); i++){
             if (counts[i] != str.npos){
-                int lenght = counts[i + 1] - counts[i];
+                size_t lenght = counts[i + 1] - counts[i];
                 if (i != counts.size() -1){
                     lenght -= 2;
                 }
@@ -54,12 +55,12 @@ std::optional<std::vector<std::pair<std::string_view, int>>> ParserDistance(std:
                std::string_view integer = request.substr(0, point - 2);
                std::string_view to = request.substr(point + 3);
                int distance = std::stod(std::string(integer));
-               dist.push_back({to, distance});
+               distance_to_next[to]=distance;
             }
         }
-        return dist;
+
     }
-    return std::nullopt;
+    return distance_to_next;
 }
 /**
  * Парсит строку вида "10.123,  -30.1837" и возвращает пару координат (широта, долгота)
@@ -161,18 +162,19 @@ void InputReader::ParseLine(std::string_view line) {
     }
 }
 
-void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) const {
+void InputReader::ApplyCommands([[maybe_unused]] catalogue::TransportCatalogue& catalogue) const {
     // Реализуйте метод самостоятельно
     using namespace parsers;
     Coordinates point;
     for(auto& com : commands_){ 
         if(com.command =="Stop"){
-            point  =ParseCoordinates(com.description);
-            catalogue.AddStop(com.id, point.lat, point.lng, true);
-            //com.description
-            auto rez=ParserDistance(com.description);
-            if(rez!=std::nullopt){
-                catalogue.SetStopNeighbour(com.id,rez.value());
+            point = ParseCoordinates(com.description);
+            catalogue.AddStop(com.id, point);
+            auto distances = ParseDistances(com.description);
+            if(distances.size()){
+                for(auto [to, dist]:distances ){
+                    catalogue.AddStopsDistance({com.id,to}, dist);
+                }
             }
         }
     }
@@ -184,12 +186,12 @@ void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) 
      }
 }
 
-void InputReader::ReadingLines(TransportCatalogue& catalogue, std::istream& inputput ){
+void InputReader::ReadLines(catalogue::TransportCatalogue& catalogue, std::istream& input ){
     size_t lines;
-    inputput >> lines >>  std::ws;
+    input >> lines >>  std::ws;
     for (size_t i = 0; i < lines; ++i) {
             std::string line;
-            getline(inputput, line);
+            getline(input, line);
             ParseLine(line);
         }
     ApplyCommands(catalogue);

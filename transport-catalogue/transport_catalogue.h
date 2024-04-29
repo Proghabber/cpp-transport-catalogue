@@ -6,29 +6,32 @@
 #include <set>
 #include <unordered_map>
 #include <map>
-#include "geo.h"
+#include <optional>
 #include <iostream>
 #include <memory>
+#include <algorithm>
+#include "geo.h"
+
+
 
 
 
 namespace catalogue{
 
 	struct StopSt{
-		std::string name;
-		double latitude;
-		double longitude;
-		bool is_point;
-
+		std::string_view name;
+		geo_math::Coordinates point;
 	};
 
 	struct  InfoBus{
-		size_t amount=0;
-		size_t unique=0;
-		double length=0;
+		size_t amount = 0;
+		size_t unique = 0;
+		double length = 0;
+		double distance = 0;
+		double curvature = 0;
 
 		bool IsEmpty(){
-			if( amount==0 && unique==0 && length==0){
+			if( amount == 0 && unique == 0 && length == 0 && length == 0 && distance == 0){
 				return true;
 			}
 			return false;
@@ -53,25 +56,28 @@ struct pair_hash
 class TransportCatalogue {
 	// Реализуйте класс самостоятельно
 	
+	std::deque<std::string> name_bus_;// имена маршрутов
+	std::deque<std::string> name_stops_;// имена остановок
+
+
 	std::deque<StopSt> stops_;// хранит структуры остановок
-	std::deque<std::pair<std::string,std::vector<std::string>>> buses_;// храник пары назыание маршрута и вектор остановок
+	std::deque<std::pair<std::string_view,std::vector<std::string_view>>> buses_;// храник пары назыание маршрута и вектор остановок
 	std::unordered_map<std::string_view,StopSt*> stops_ptr_;// словарь ключ - остановка значение - указатель на структуру этой установки
-	std::unordered_map<std::string_view,std::vector<std::string>*> bus_ptr_;// словарь ключ - название маршрута значение - указатель на вектор остановок этого марщрута
-	std::unordered_map<std::string,std::set<std::string_view>> bases_for_stops_;// хранит коллекцию маршрутов на которых есть остановка - ключ
+	std::unordered_map<std::string_view,std::vector<std::string_view>> bus_ptr_;// словарь ключ - название маршрута значение - указатель на вектор остановок этого марщрута
+	std::unordered_map<std::string_view,std::set<std::string_view>> stops_to_buses_;// хранит коллекцию маршрутов на которых есть остановка - ключ
 	std::unordered_map<std::pair<std::string_view,std::string_view>,  int, pair_hash> stop_distance_;// ключ- пара остановой( возможно понадобится хешер!!!) значение- дистанция
 
+	InfoBus CountInfoBetweenStations(std::string_view bus ) const;
+	double CountDist(std::string_view name) const;
 
 	public:
 	
-	void AddStop(const std::string& id, double lat, double lag, bool point_is);
-	void AddStop(const std::string& id);
+	void AddStop(const std::string& id,geo_math::Coordinates point);
 	void AddBus(const std::string& id, const std::vector<std::string_view>& stops);
-	InfoBus CountStation(std::string_view id ) const;
-	InfoBus ReturnBus(std::string_view id)const;
+	InfoBus FindBus(std::string_view id)const;
 	void BusForStop(std::string_view id );
-	std::set<std::string> ReturnStop(std::string_view id )const;
-	void SetStopNeighbour(std::string_view center, std::vector<std::pair<std::string_view, int>> neighbour); 
-	double CountDist(std::string_view name) const;
+	std::optional<std::set<std::string_view>> ReturnBusesWithStop(std::string_view id )const;
+	void AddStopsDistance(std::pair<std::string_view,std::string_view>stops, int distance);
 	
 
 };

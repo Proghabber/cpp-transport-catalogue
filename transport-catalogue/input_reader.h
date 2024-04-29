@@ -22,7 +22,7 @@ struct CommandDescription {
     std::string description;  // Параметры команды
 };
 
-using namespace catalogue;
+
 
 class InputReader {
 public:
@@ -35,9 +35,9 @@ public:
     /**
      * Наполняет данными транспортный справочник, используя команды из commands_
      */
-    void ApplyCommands(TransportCatalogue& catalogue) const;
+    void ApplyCommands(catalogue::TransportCatalogue& catalogue) const;
 
-    void ReadingLines(TransportCatalogue& catalogue, std::istream& inputput );
+    void ReadLines(catalogue::TransportCatalogue& catalogue, std::istream& input );
 
 private:
     std::vector<CommandDescription> commands_;

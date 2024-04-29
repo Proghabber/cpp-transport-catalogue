@@ -5,11 +5,11 @@
 
 #include "transport_catalogue.h"
 
-using namespace catalogue;
+
 namespace utility{
-void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,
+void ParseAndPrintStat(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view request,
                        std::ostream& output);
 
-void ReturnRsult(TransportCatalogue& catalogue, std::ostream& output, std::istream& input);
+void ExecuteStatRequests(catalogue::TransportCatalogue& tansport_catalogue, std::ostream& output, std::istream& input);
 
 }
