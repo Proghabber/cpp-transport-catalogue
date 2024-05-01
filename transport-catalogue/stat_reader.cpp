@@ -3,20 +3,20 @@
 
 namespace utility{
 
-void PrintBus(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view rigth, std::ostream& output){
-    catalogue::InfoBus rez = tansport_catalogue.FindBus(rigth); 
-    if (!rez.IsEmpty()){
-        output<<left<<" "<<rigth<<": "<<rez.amount<<" stops on route, "<<rez.unique<<" unique stops, "<<rez.distance<<" route length, "<<rez.curvature<<" curvature" ;
+void PrintBus(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view right, std::ostream& output){
+    catalogue::InfoBus bus_info = tansport_catalogue.FindBus(right); 
+    if (!bus_info.IsEmpty()){
+        output<<left<<" "<<right<<": "<<bus_info.amount<<" stops on route, "<<bus_info.unique<<" unique stops, "<<bus_info.distance<<" route length, "<<bus_info.curvature<<" curvature" ;
     } else {      
-        output<<left<<" "<<rigth<<": not found";
+        output<<left<<" "<<right<<": not found";
     }
 
 }
 
-void PrintStop(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view rigth, std::ostream& output){
-    std::optional<std::set<std::string_view>>  answer =tansport_catalogue.ReturnBusesWithStop(rigth);
-        output<<left<<" "<<rigth<<":";
-        if(answer==std::nullopt){
+void PrintStop(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view right, std::ostream& output){
+    std::optional<std::set<std::string_view>>  answer =tansport_catalogue.ReturnBusesWithStop(right);
+        output<<left<<" "<<right<<":";
+        if(answer == std::nullopt){
             output<<" not found";
         } else {
             if(answer.value().size() == 0){
@@ -27,9 +27,7 @@ void PrintStop(const catalogue::TransportCatalogue& tansport_catalogue, std::str
                     output<<" "<<s;
                 }
             }
-        }
-        
-        
+        }      
 }
 
 void ParseAndPrintStat(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view request,
@@ -37,12 +35,12 @@ void ParseAndPrintStat(const catalogue::TransportCatalogue& tansport_catalogue, 
     std::string_view answer;                  
     size_t pos = request.find(' '); 
     std::string_view left = request.substr(0,pos);    
-    std::string_view rigth = request.substr(pos+1);
+    std::string_view right = request.substr(pos + 1);
 
     if (left == "Bus"){
-        PrintBus(tansport_catalogue, left, rigth, output);    
+        PrintBus(tansport_catalogue, left, right, output);    
     } else if (left == "Stop"){
-        PrintStop(tansport_catalogue, left, rigth, output);
+        PrintStop(tansport_catalogue, left, right, output);
     } 
     output<<std::endl;
 }

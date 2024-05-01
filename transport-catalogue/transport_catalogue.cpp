@@ -4,20 +4,18 @@
 
 namespace catalogue{
 void TransportCatalogue::AddStop(const std::string& id ,geo_math::Coordinates point){
-    auto s = std::find(name_stops_.begin(),name_stops_.end(),id);
+    auto s = std::find(name_stops_.begin(), name_stops_.end(), id);
     if(s !=name_stops_.end() ){
-        StopSt t(*s, point);
+        Stop t(*s, point);
         stops_.push_back(t); 
         stops_ptr_[*s] = &stops_.back();
     }else{
         name_stops_.push_back(id);
-        StopSt t(name_stops_.back(), point);
+        Stop t(name_stops_.back(), point);
         stops_.push_back(t); 
-        stops_ptr_[name_stops_.back()]=&stops_.back();
+        stops_ptr_[name_stops_.back()] = &stops_.back();
        
-    }
-    
-         
+    }       
 }
 
 
@@ -25,15 +23,15 @@ void TransportCatalogue::AddBus(const std::string& id, const std::vector<std::st
     std::vector<std::string_view> filtered_stops_vector;   
     for (auto& stop:stops){
         if (stops_ptr_.count(stop)){
-            size_t index =std::find(name_stops_.begin(), name_stops_.end(), stop)-name_stops_.begin();
+            size_t index = std::find(name_stops_.begin(), name_stops_.end(), stop)-name_stops_.begin();
             filtered_stops_vector.push_back(name_stops_[index]);     
         }    
     }
     name_bus_.push_back(id);
     buses_.push_back({name_bus_.back(), filtered_stops_vector});
-    bus_ptr_[buses_.back().first] = buses_.back().second;
-    for (auto stop : bus_ptr_.at(buses_.back().first)){
-        stops_to_buses_[stop].insert(buses_.back().first);
+    bus_ptr_[buses_.back().name] = buses_.back().stops;
+    for (auto stop : bus_ptr_.at(buses_.back().name)){
+        stops_to_buses_[stop].insert(buses_.back().name);
      }
 }
 
@@ -59,7 +57,7 @@ void TransportCatalogue::AddBus(const std::string& id, const std::vector<std::st
         if (statistics_repeat[stop] >1 ){
              repeat_stop++;
         }
-        distance_geo+=ComputeDistance(to, from);
+        distance_geo += ComputeDistance(to, from);
         from = to;
         count++;
     }
@@ -91,24 +89,26 @@ std::optional<std::set<std::string_view>> TransportCatalogue::ReturnBusesWithSto
 
 
 double TransportCatalogue::CountDist(std::string_view name) const{
-    double count=0;
+    double count = 0;
     std::vector<std::string_view> list = bus_ptr_.at(name);
     for (size_t i = 0; i < list.size() - 1; i++){//идем по остановкам   
-        if (stop_distance_.count({list.at(i), list.at(i + 1)})){ //создадим пару так как она есть
-            count += stop_distance_.at({list.at(i), list.at(i + 1)});
+        auto straight = ReturnStopsDistance(list.at(i), list.at(i + 1));//создадим пару так как она есть
+        auto reverse  = ReturnStopsDistance(list.at(i+1), list.at(i));// или перевернем пару
+        if (straight != std::nullopt){
+            count += straight.value();
         } else {
-            auto s={list.at(i+1), list.at(i)};
-            count += stop_distance_.at({list.at(i+1), list.at(i)});// или перевернем пару
+            count += reverse.value();
         }
     }
     return count;
         
     }
-    void TransportCatalogue::AddStopsDistance(std::pair<std::string_view,std::string_view>stops, int distance){
-        size_t one = std::find(name_stops_.begin(),name_stops_.end(),stops.first)-name_stops_.begin();
-        size_t two = std::find(name_stops_.begin(),name_stops_.end(),stops.second)-name_stops_.begin();
+
+    void TransportCatalogue::AddStopsDistance(std::string_view stop_one, std::string_view stop_two, int distance){
+        size_t one = std::find(name_stops_.begin(), name_stops_.end(), stop_one)-name_stops_.begin();
+        size_t two = std::find(name_stops_.begin(), name_stops_.end(), stop_two)-name_stops_.begin();
         if ( two>=name_stops_.size() ){
-            name_stops_.push_back(std::string(stops.second));
+            name_stops_.push_back(std::string(stop_two));
             std::pair<std::string_view,std::string_view> dist(name_stops_[one],name_stops_.back());
             stop_distance_[dist] = distance;
         } else {
@@ -117,5 +117,12 @@ double TransportCatalogue::CountDist(std::string_view name) const{
         }
     }
 
+    std::optional<int> TransportCatalogue::ReturnStopsDistance(std::string_view stop_one, std::string_view stop_two) const {
+        std::pair<std::string_view, std::string_view> stops(stop_one, stop_two);
+        if(stop_distance_.count(stops)){
+            return {stop_distance_.at(stops)};
+        }
+        return std::nullopt;
 
+    }
 }

@@ -173,7 +173,7 @@ void InputReader::ApplyCommands([[maybe_unused]] catalogue::TransportCatalogue& 
             auto distances = ParseDistances(com.description);
             if(distances.size()){
                 for(auto [to, dist]:distances ){
-                    catalogue.AddStopsDistance({com.id,to}, dist);
+                    catalogue.AddStopsDistance(com.id, to, dist);
                 }
             }
         }
@@ -193,7 +193,7 @@ void InputReader::ReadLines(catalogue::TransportCatalogue& catalogue, std::istre
             std::string line;
             getline(input, line);
             ParseLine(line);
-        }
+    }
     ApplyCommands(catalogue);
 }
 

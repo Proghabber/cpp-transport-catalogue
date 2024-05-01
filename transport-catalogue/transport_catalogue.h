@@ -18,12 +18,17 @@
 
 namespace catalogue{
 
-	struct StopSt{
+	struct Stop {
 		std::string_view name;
 		geo_math::Coordinates point;
 	};
 
-	struct  InfoBus{
+	struct Bus {
+		std::string_view name;
+		std::vector<std::string_view> stops;
+	};
+
+	struct  InfoBus {
 		size_t amount = 0;
 		size_t unique = 0;
 		double length = 0;
@@ -60,24 +65,24 @@ class TransportCatalogue {
 	std::deque<std::string> name_stops_;// имена остановок
 
 
-	std::deque<StopSt> stops_;// хранит структуры остановок
-	std::deque<std::pair<std::string_view,std::vector<std::string_view>>> buses_;// храник пары назыание маршрута и вектор остановок
-	std::unordered_map<std::string_view,StopSt*> stops_ptr_;// словарь ключ - остановка значение - указатель на структуру этой установки
+	std::deque<Stop> stops_;// хранит структуры остановок
+	std::deque<Bus> buses_;// хранит структуры маршрутов
+	std::unordered_map<std::string_view,Stop*> stops_ptr_;// словарь ключ - остановка значение - указатель на структуру этой установки
 	std::unordered_map<std::string_view,std::vector<std::string_view>> bus_ptr_;// словарь ключ - название маршрута значение - указатель на вектор остановок этого марщрута
 	std::unordered_map<std::string_view,std::set<std::string_view>> stops_to_buses_;// хранит коллекцию маршрутов на которых есть остановка - ключ
 	std::unordered_map<std::pair<std::string_view,std::string_view>,  int, pair_hash> stop_distance_;// ключ- пара остановой( возможно понадобится хешер!!!) значение- дистанция
 
-	InfoBus CountInfoBetweenStations(std::string_view bus ) const;
+	InfoBus CountInfoBetweenStations(std::string_view bus) const;
 	double CountDist(std::string_view name) const;
+	std::optional<int> ReturnStopsDistance(std::string_view stop_one, std::string_view stop_two) const;
 
-	public:
-	
+public:
 	void AddStop(const std::string& id,geo_math::Coordinates point);
 	void AddBus(const std::string& id, const std::vector<std::string_view>& stops);
 	InfoBus FindBus(std::string_view id)const;
-	void BusForStop(std::string_view id );
-	std::optional<std::set<std::string_view>> ReturnBusesWithStop(std::string_view id )const;
-	void AddStopsDistance(std::pair<std::string_view,std::string_view>stops, int distance);
+	std::optional<std::set<std::string_view>> ReturnBusesWithStop(std::string_view id)const;
+	void AddStopsDistance(std::string_view stop_one, std::string_view stop_two, int distance);
+	
 	
 
 };
