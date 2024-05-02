@@ -80,7 +80,7 @@ public:
 	void AddStop(const std::string& id,geo_math::Coordinates point);
 	void AddBus(const std::string& id, const std::vector<std::string_view>& stops);
 	InfoBus FindBus(std::string_view id)const;
-	std::optional<std::set<std::string_view>> ReturnBusesWithStop(std::string_view id)const;
+	std::set<std::string_view> ReturnBusesWithStop(std::string_view id)const;
 	void AddStopsDistance(std::string_view stop_one, std::string_view stop_two, int distance);
 	
 	

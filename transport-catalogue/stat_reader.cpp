@@ -14,20 +14,24 @@ void PrintBus(const catalogue::TransportCatalogue& tansport_catalogue, std::stri
 }
 
 void PrintStop(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view left, std::string_view right, std::ostream& output){
-    std::optional<std::set<std::string_view>>  answer =tansport_catalogue.ReturnBusesWithStop(right);
-        output<<left<<" "<<right<<":";
-        if(answer == std::nullopt){
-            output<<" not found";
-        } else {
-            if(answer.value().size() == 0){
+    output<<left<<" "<<right<<":";
+    catalogue::InfoBus bus_info = tansport_catalogue.FindBus(right);
+    if(bus_info.IsEmpty()){
+        output<<" not found";
+    } else {
+        std::set<std::string_view> answer =tansport_catalogue.ReturnBusesWithStop(right);
+        if(answer.size()){
                 output<<" no buses";
-            } else { 
-                output<<" buses";
-                for (std::string_view s : answer.value()){
-                    output<<" "<<s;
-                }
+        }else {
+            output<<" buses";
+            for (std::string_view s : answer){
+                output<<" "<<s;
             }
-        }      
+        }       
+    }
+
+
+
 }
 
 void ParseAndPrintStat(const catalogue::TransportCatalogue& tansport_catalogue, std::string_view request,

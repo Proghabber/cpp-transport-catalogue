@@ -71,20 +71,9 @@ void TransportCatalogue::AddBus(const std::string& id, const std::vector<std::st
     return CountInfoBetweenStations(id);
 }
 
-std::optional<std::set<std::string_view>> TransportCatalogue::ReturnBusesWithStop(std::string_view id ) const{
-    std::set<std::string_view> rez;
-    if (!stops_to_buses_.count(id)){
-        if (stops_ptr_.count(id)){
-            return rez;
-        }
-        return std::nullopt;
-    } else {
-        std::set<std::string_view> collect = stops_to_buses_.at(id);
-             for (std::string_view bus: collect){
-                rez.insert(bus);
-             }
-    }
-    return rez;
+std::set<std::string_view> TransportCatalogue::ReturnBusesWithStop(std::string_view id ) const{
+    std::set<std::string_view> collect = stops_to_buses_.at(id);
+    return collect;
 }
 
 
