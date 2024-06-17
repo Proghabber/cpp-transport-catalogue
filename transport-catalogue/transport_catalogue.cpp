@@ -19,36 +19,49 @@ void TransportCatalogue::AddStop(const std::string& id ,geo_math::Coordinates po
 }
 
 
-void TransportCatalogue::AddBus(const std::string& id, const std::vector<std::string_view>& stops){
+
+void TransportCatalogue::AddBus(const std::string& bus, const std::vector<std::string_view>& stops, bool is_roundtrip)
+{
     std::vector<std::string_view> filtered_stops_vector;   
+    //buses_
     for (auto& stop:stops){
         if (stops_ptr_.count(stop)){
             size_t index = std::find(name_stops_.begin(), name_stops_.end(), stop)-name_stops_.begin();
             filtered_stops_vector.push_back(name_stops_[index]);     
         }    
     }
-    name_bus_.push_back(id);
-    buses_.push_back({name_bus_.back(), filtered_stops_vector});
-    bus_ptr_[buses_.back().name] = buses_.back().stops;
-    for (auto stop : bus_ptr_.at(buses_.back().name)){
-        stops_to_buses_[stop].insert(buses_.back().name);
+    name_bus_.push_back(bus);
+    //buses_.push_back({name_bus_.back(), filtered_stops_vector, is_roundtrip});
+    buses_[name_bus_.back()] = {name_bus_.back(), filtered_stops_vector, is_roundtrip};
+    //bus_ptr_[buses_.back().name] = buses_.back().stops;
+    bus_ptr_[name_bus_.back()] = buses_[name_bus_.back()].stops;
+
+    for (auto stop : bus_ptr_.at(bus)){
+        //stops_to_buses_[stop].insert(buses_.back().name);
+        stops_to_buses_[stop].insert(buses_[name_bus_.back()].name);
      }
+     std::cout<<"";
 }
 
 
- InfoBus TransportCatalogue::CountInfoBetweenStations(std::string_view bus ) const{
 
-    int count = 0;
-    size_t count_stops = bus_ptr_.at(bus).size();
-    size_t repeat_stop = 0 ;
+   InfoBus TransportCatalogue::CountInfoBetweenStations(std::string_view bus ) const{
+    
+     int count = 0;
+    
+    int repeat_stop = 0 ;
     std::map<std::string_view, size_t> statistics_repeat;
     
     Coordinates from;
     Coordinates to;
     double distance_geo = 0;
-    double distance_track = CountDist(bus);
+    
 
-    for (auto stop : bus_ptr_.at(bus) ){
+    
+    std::vector<std::string_view> rezult = buses_.at(bus).MakeFullBus();
+    double distance_track = CountDist(rezult);
+    int count_stops = rezult.size();
+    for (auto stop : rezult ){
         ++statistics_repeat[stop];
         to=stops_ptr_.at(stop)->point;    
         if (!count){
@@ -61,28 +74,57 @@ void TransportCatalogue::AddBus(const std::string& id, const std::vector<std::st
         from = to;
         count++;
     }
-    return {count_stops, count_stops-repeat_stop, distance_geo, distance_track, distance_track/distance_geo};
+    
+  
+    double curvature = distance_track/distance_geo;
+    return {buses_.at(bus).name, count_stops, count_stops-repeat_stop, distance_geo, distance_track,
+            curvature, buses_.at(bus).is_roundtrip};
 }
 
  InfoBus TransportCatalogue::FindBus(std::string_view id) const {
     if (!bus_ptr_.count(id)){ 
-        return {};
+        return InfoBus();
     }  
     return CountInfoBetweenStations(id);
 }
 
-std::set<std::string_view> TransportCatalogue::ReturnBusesWithStop(std::string_view id ) const{
-    std::set<std::string_view> collect = stops_to_buses_.at(id);
+InfoStop TransportCatalogue::FindStop(std::string_view id) const{
+    if(!stops_ptr_.count(id)){
+        return InfoStop();
+    }
+    return ReturnBusesWithStop(id);
+}
+
+std::unordered_map<std::string_view, Bus> TransportCatalogue::GetAllBus() const
+{
+    return buses_;
+}
+
+std::unordered_map<std::string_view, Stop *> TransportCatalogue::GetAllstops() const
+{
+    return stops_ptr_;
+}
+
+InfoStop TransportCatalogue::ReturnBusesWithStop(std::string_view id ) const{
+    InfoStop collect;
+    collect.name = stops_ptr_.at(id)->name;
+    if(!stops_to_buses_.count(id)){
+        collect.name = stops_ptr_.at(id)->name;
+        return collect;
+    }
+    collect.name = stops_ptr_.at(id)->name;
+    collect.stops = stops_to_buses_.at(id);
+     
     return collect;
 }
 
 
-double TransportCatalogue::CountDist(std::string_view name) const{
+double TransportCatalogue::CountDist(std::vector<std::string_view> list_stop) const{
     double count = 0;
-    std::vector<std::string_view> list = bus_ptr_.at(name);
-    for (size_t i = 0; i < list.size() - 1; i++){//идем по остановкам   
-        auto straight = ReturnStopsDistance(list.at(i), list.at(i + 1));//создадим пару так как она есть
-        auto reverse  = ReturnStopsDistance(list.at(i+1), list.at(i));// или перевернем пару
+    
+    for (size_t i = 0; i < list_stop.size() - 1; i++){//идем по остановкам   
+        auto straight = ReturnStopsDistance(list_stop.at(i), list_stop.at(i + 1));//создадим пару так как она есть
+        auto reverse  = ReturnStopsDistance(list_stop.at(i+1), list_stop.at(i));// или перевернем пару
         if (straight != std::nullopt){
             count += straight.value();
         } else {

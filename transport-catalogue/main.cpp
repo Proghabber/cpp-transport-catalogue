@@ -1,13 +1,18 @@
 #include <iostream>
 #include <string>
 
-#include "input_reader.h"
-#include "stat_reader.h"
+#include "json_reader.h"
+#include "request_handler.h"
+#include "transport_catalogue.h"
+
+
 
 using namespace std;
 
+
+
 int main() {
-    catalogue::TransportCatalogue catalogue;
+    /*catalogue::TransportCatalogue catalogue;
 
    
 
@@ -20,7 +25,20 @@ int main() {
     {
         using namespace utility;
         ExecuteStatRequests(catalogue, std::cout, std::cin);
-    }
+    }*/
+   
+    //RequestHandler hendler;
+    //std::cout<<readJson::ReturnRequest(std::cin).str();
+    readJson::JsonReader readders;
+    catalogue::TransportCatalogue transport;
+    render::SvgMaker make;
+    handler::RequestHandler handl(transport,make);
     
     
+    readders.ParsingRequests(std::cin, handl);
+    //handl.MakeImage(std::cout);
+    
+    
+   std::cout<<readders.Print(handl);
+    return 0;
 }
