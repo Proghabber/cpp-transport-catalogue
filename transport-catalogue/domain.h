@@ -1,13 +1,87 @@
 #pragma once
 
-/*
- * В этом файле вы можете разместить классы/структуры, которые являются частью предметной области (domain)
- * вашего приложения и не зависят от транспортного справочника. Например Автобусные маршруты и Остановки. 
- *
- * Их можно было бы разместить и в transport_catalogue.h, однако вынесение их в отдельный
- * заголовочный файл может оказаться полезным, когда дело дойдёт до визуализации карты маршрутов:
- * визуализатор карты (map_renderer) можно будет сделать независящим от транспортного справочника.
- *
- * Если структура вашего приложения не позволяет так сделать, просто оставьте этот файл пустым.
- *
- */
+#include <variant>
+#include <vector>
+#include <set>
+#include <map>
+#include <string>
+#include <string_view>
+#include "geo.h"
+
+namespace data_bus
+{
+	struct Stop{
+		Stop(std::string_view name_org, geo_math::Coordinates point_org) : name(name_org), point(point_org) {}
+		std::string_view name;
+		geo_math::Coordinates point;
+	};
+
+	struct Bus{
+		std::string_view name;
+		std::vector<std::string_view> stops;
+		bool is_roundtrip;
+		std::vector<std::string_view> MakeFullBus() const;
+	};
+
+	struct InfoBus{
+		std::string_view name;
+		int amount = 0;
+		int unique = 0;
+		double length = 0;
+		double distance = 0;
+		double curvature = 0;
+		bool is_roundtrip = false;
+		bool IsEmpty();
+	};
+
+	struct InfoStop{
+		std::string_view name;
+		std::set<std::string_view> stops;
+		bool IsEmpty();
+	};
+
+	using BusMap = std::map<std::string_view, data_bus::Bus>;
+    using StopMap = std::map<std::string_view, data_bus::Stop *>;
+	
+}
+
+namespace data_handler
+{
+	struct map_request{
+      int id;
+      bool answer;
+    };
+
+    struct bus_request{
+        std::string name;
+        bool is_roundtrip;
+        std::vector<std::string> stops;
+    };
+
+    struct stop_request{
+      std::string name;
+      geo_math::Coordinates point;
+      std::map<std::string, int> distance;
+
+    };
+
+    struct AllRequest{
+      std::vector<bus_request> buses;
+      std::vector<stop_request> stops;
+
+    };
+
+    struct RetRequest{
+      int id;
+      std::string type;
+      std::string name;
+    };
+
+    struct BusCollect{
+      std::vector<std::string_view> stops;
+      std::vector<geo_math::Coordinates> cordinates;
+      int color_number = 0;
+    }; 
+
+	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, map_request>;
+}
