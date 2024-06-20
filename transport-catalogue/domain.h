@@ -8,10 +8,11 @@
 #include <string_view>
 #include "geo.h"
 
-namespace data_bus
-{
+namespace data_bus{
 	struct Stop{
-		Stop(std::string_view name_org, geo_math::Coordinates point_org) : name(name_org), point(point_org) {}
+		Stop(std::string_view name_org, geo_math::Coordinates point_org) : name(name_org), point(point_org) 
+		{
+		}
 		std::string_view name;
 		geo_math::Coordinates point;
 	};
@@ -25,8 +26,8 @@ namespace data_bus
 
 	struct InfoBus{
 		std::string_view name;
-		int amount = 0;
-		int unique = 0;
+		size_t amount = 0;
+		size_t unique = 0;
 		double length = 0;
 		double distance = 0;
 		double curvature = 0;
@@ -42,46 +43,42 @@ namespace data_bus
 
 	using BusMap = std::map<std::string_view, data_bus::Bus>;
     using StopMap = std::map<std::string_view, data_bus::Stop *>;
-	
 }
 
-namespace data_handler
-{
-	struct map_request{
+namespace data_handler{
+	struct Map_request{
       int id;
       bool answer;
     };
 
-    struct bus_request{
+    struct Bus_request{
         std::string name;
         bool is_roundtrip;
         std::vector<std::string> stops;
     };
 
-    struct stop_request{
-      std::string name;
-      geo_math::Coordinates point;
-      std::map<std::string, int> distance;
-
+    struct Stop_request{
+		std::string name;
+		geo_math::Coordinates point;
+		std::map<std::string, int> distance;
     };
 
     struct AllRequest{
-      std::vector<bus_request> buses;
-      std::vector<stop_request> stops;
-
+		std::vector<Bus_request> buses;
+		std::vector<Stop_request> stops;
     };
 
     struct RetRequest{
-      int id;
-      std::string type;
-      std::string name;
+		int id;
+		std::string type;
+		std::string name;
     };
 
     struct BusCollect{
-      std::vector<std::string_view> stops;
-      std::vector<geo_math::Coordinates> cordinates;
-      int color_number = 0;
+		std::vector<std::string_view> stops;
+		std::vector<geo_math::Coordinates> cordinates;
+		int color_number = 0;
     }; 
 
-	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, map_request>;
+	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, Map_request>;
 }

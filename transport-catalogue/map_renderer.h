@@ -12,10 +12,8 @@
 #include <map>
 #include <unordered_map>
 
-namespace render
-{
-    struct SvgOption
-    {
+namespace render{
+    struct SvgOption{
         double width;
         double height;
         double padding;
@@ -36,8 +34,7 @@ namespace render
     using set_bus = std::map<std::string_view, std::vector<std::pair<std::string_view, geo_math::Coordinates>>>;
     using collect_bus = std::vector<set_bus>;
 
-    class SphereProjector
-    {
+    class SphereProjector{
     public:
         // points_begin и points_end задают начало и конец интервала элементов geo::Coordinates
         template <typename PointInputIt>
@@ -46,8 +43,7 @@ namespace render
             : padding_(padding) //
         {
             // Если точки поверхности сферы не заданы, вычислять нечего
-            if (points_begin == points_end)
-            {
+            if (points_begin == points_end){
                 return;
             }
 
@@ -69,44 +65,37 @@ namespace render
 
             // Вычисляем коэффициент масштабирования вдоль координаты x
             std::optional<double> width_zoom;
-            if (!IsZero(max_lon - min_lon_))
-            {
+            if (!IsZero(max_lon - min_lon_)){
                 width_zoom = (max_width - 2 * padding) / (max_lon - min_lon_);
             }
 
             // Вычисляем коэффициент масштабирования вдоль координаты y
             std::optional<double> height_zoom;
-            if (!IsZero(max_lat_ - min_lat))
-            {
+            if (!IsZero(max_lat_ - min_lat)){
                 height_zoom = (max_height - 2 * padding) / (max_lat_ - min_lat);
             }
 
-            if (width_zoom && height_zoom)
-            {
+            if (width_zoom && height_zoom){
                 // Коэффициенты масштабирования по ширине и высоте ненулевые,
                 // берём минимальный из них
                 zoom_coeff_ = std::min(*width_zoom, *height_zoom);
             }
-            else if (width_zoom)
-            {
+            else if (width_zoom){
                 // Коэффициент масштабирования по ширине ненулевой, используем его
                 zoom_coeff_ = *width_zoom;
             }
-            else if (height_zoom)
-            {
+            else if (height_zoom){
                 // Коэффициент масштабирования по высоте ненулевой, используем его
                 zoom_coeff_ = *height_zoom;
             }
         }
 
         // Проецирует широту и долготу в координаты внутри SVG-изображения
-        svg::Point operator()(geo_math::Coordinates coords) const
-        {
+        svg::Point operator()(geo_math::Coordinates coords) const {
             return {
                 (coords.lng - min_lon_) * zoom_coeff_ + padding_,
                 (max_lat_ - coords.lat) * zoom_coeff_ + padding_};
         }
-
     private:
         double padding_;
         double min_lon_ = 0;
@@ -118,10 +107,9 @@ namespace render
     class SvgMaker{
     public:
         void MakeImage(std::ostream &out, const data_bus::BusMap &busses, const data_bus::StopMap &stops, SvgOption &&options);
-    private:
-        
+    private:    
         SvgOption svg_options_;
-        std::unordered_map<std::string_view, int> bus_color_;                                      // имена маршрутов и цвета
+        std::unordered_map<std::string_view, size_t> bus_color_;                                      // имена маршрутов и цвета
         std::vector<geo_math::Coordinates> SavePoints(const data_bus::BusMap &busses, const data_bus::StopMap &stops); // создает список кординат для вычесления точек на карте
 
         std::vector<geo_math::Coordinates> ReferryStopPoins(const data_bus::BusMap &busses, const data_bus::StopMap &stops, const std::string_view bus); // соотнесет остановки и их кординаты

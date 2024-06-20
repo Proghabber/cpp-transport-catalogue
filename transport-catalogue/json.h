@@ -32,30 +32,37 @@ namespace json {
         Node();
         Node(Array array)
             : data_(move(array)) 
-        {}
+        {
+        }
     
         Node(Dict map)
             : data_(move(map)) 
-        {}
+        {
+        }
     
         Node(int value)
             : data_(value) 
-        {}
+        {
+        }
     
         Node(std::string value)
             : data_(move(value)) 
-        {}
+        {
+        }
     
         Node(double value) 
             : data_(value)
-        {}
+        {
+        }
     
         Node(bool value) 
             : data_(value)
-        {}
+        {
+        }
         Node(std::nullptr_t value) 
             : data_(value)
-        {}
+        {
+        }
 
         bool IsInt() const noexcept;
         bool IsDouble() const noexcept; //Возвращает true, если в Node хранится int либо double.
@@ -84,19 +91,19 @@ namespace json {
     struct swapper{
         std::ostream& out;
 
-        void operator()()  { 
+        void operator()(){ 
             out<< "null";   
         }
 
-        void  operator()(double root)  {
+        void  operator()(double root){
             out<< root;
         }
 
-        void  operator()(int root)  {
+        void  operator()(int root){
             out<< root;
         }
 
-        void  operator()(bool root)  {
+        void  operator()(bool root){
             std::string text;
             if (root){
                 text = "true";
@@ -106,7 +113,7 @@ namespace json {
             out<<text;
         }
 
-        void  operator()(std::string root )  {
+        void  operator()(std::string root ){
             std::string text;
             text += "\"";
             for (auto c:root){
@@ -128,12 +135,11 @@ namespace json {
             out<< text;
         }
 
-        void  operator()(Array root)  {
+        void  operator()(Array root){
             out<<root;
         }
 
-        void  operator()(Dict root)  {
-        
+        void  operator()(Dict root) {
             out<<root;
         }
     };
@@ -144,7 +150,6 @@ namespace json {
         const Node& GetRoot() const;
         bool operator==(const Document& other) const;
         bool operator!=(const Document& other) const;
-
     private:
         Node root_;
     };

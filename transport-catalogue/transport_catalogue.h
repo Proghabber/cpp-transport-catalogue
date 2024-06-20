@@ -16,8 +16,7 @@
 
 namespace catalogue{
 	using namespace geo_math;
-	struct pair_hash
-	{
+	struct pair_hash{
 		template <class T1, class T2>
 		std::size_t operator() (const std::pair<T1, T2> &pair) const {
 			return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
@@ -38,7 +37,6 @@ namespace catalogue{
 		data_bus::InfoStop ReturnBusesWithStop(std::string_view id)const;
 		double CountDist(std::vector<std::string_view> list_stop) const;
 		std::optional<int> ReturnStopsDistance(std::string_view stop_one, std::string_view stop_two) const;
-
 	public:
 		void AddStop(const std::string& id,geo_math::Coordinates point);
 		void AddBus(const std::string& bus, const std::vector<std::string_view>& stops, bool is_roundtrip);

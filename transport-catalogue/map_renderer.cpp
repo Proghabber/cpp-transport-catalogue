@@ -1,14 +1,14 @@
 #include "map_renderer.h"
 
-namespace render
-{
+namespace render{
+    
     bool IsZero(double value){
         return std::abs(value) < EPSILON;
     }
 
     void SvgMaker::MakeImage(std::ostream &out, const data_bus::BusMap &busses, const data_bus::StopMap &stops, SvgOption &&options){
         svg_options_ = options;
-        std::vector<geo_math::Coordinates> cordinates_all = (SavePoints(busses, stops));
+        std::vector<geo_math::Coordinates> cordinates_all = SavePoints(busses, stops);
 
         SphereProjector svg_cordinates = SphereProjector(cordinates_all.begin(), cordinates_all.end(),
                                                          svg_options_.width, 
@@ -44,8 +44,7 @@ namespace render
         return cordinates_all;
     }
 
-    std::vector<geo_math::Coordinates> SvgMaker::ReferryStopPoins(const data_bus::BusMap &busses, const data_bus::StopMap &stops, const std::string_view bus)
-    {
+    std::vector<geo_math::Coordinates> SvgMaker::ReferryStopPoins(const data_bus::BusMap &busses, const data_bus::StopMap &stops, const std::string_view bus){
         std::vector<geo_math::Coordinates> points;
         std::vector<std::string_view> stops_name = busses.at(bus).MakeFullBus();
         for (std::string_view stop : stops_name){
@@ -62,7 +61,7 @@ namespace render
                 number_color = 0;
             }
             bus_color_[bus.first] = number_color;
-            doc.Add(MakeLine(std::move(ReferryStopPoins(busses, stops, bus.first)), svg_options_, svg_cordinates, bus_color_[bus.first]));
+            doc.Add(MakeLine(std::move(ReferryStopPoins(busses, stops, bus.first)), svg_options_, svg_cordinates, bus_color_.at(bus.first)));
             number_color++;
         }
     }
@@ -73,7 +72,7 @@ namespace render
             std::vector<geo_math::Coordinates> points = ReferryStopPoins(busses, stops, bus.first);
             doc.Add(MakeBackBus(bus.first, svg_options_, points.at(0), svg_cordinates));
             doc.Add(MakeBus(bus.first, svg_options_, points.at(0), svg_cordinates, bus_color_.at(bus.first)));
-            if (bus.second.is_roundtrip == false && *bus.second.stops.begin() != *(bus.second.stops.begin() + end_stop)){
+            if (bus.second.is_roundtrip == false && *bus.second.stops.begin() != *(bus.second.stops.begin() + static_cast<int>(end_stop))){
                 doc.Add(MakeBackBus(bus.first, svg_options_, points.at(end_stop), svg_cordinates));
                 doc.Add(MakeBus(bus.first, svg_options_, points.at(end_stop), svg_cordinates, bus_color_.at(bus.first)));
             }
@@ -123,7 +122,7 @@ namespace render
 
         text.SetPosition(svg_cordinates(point));                                          // x,y
         text.SetOffset({options.bus_label_offset.at(0), options.bus_label_offset.at(1)}); // dx,dy
-        text.SetFontSize(options.bus_label_font_size);                                    // font-size
+        text.SetFontSize(static_cast<uint32_t>(options.bus_label_font_size));                                    // font-size
         text.SetFontFamily("Verdana");                                                    // font-family
         text.SetFontWeight("bold");                                                       // font-weight
         text.SetData(std::string(name));                                                  // text
@@ -136,7 +135,7 @@ namespace render
 
         text.SetPosition(svg_cordinates(point));                                          // x,y
         text.SetOffset({options.bus_label_offset.at(0), options.bus_label_offset.at(1)}); // dx,dy
-        text.SetFontSize(options.bus_label_font_size);                                    // font-size
+        text.SetFontSize(static_cast<uint32_t>(options.bus_label_font_size));                                    // font-size
         text.SetFontFamily("Verdana");                                                    // font-family
         text.SetFontWeight("bold");                                                       // font-weight
         text.SetData(std::string(name));                                                  // text
@@ -147,6 +146,7 @@ namespace render
         text.SetStrokeLineJoin(StrokeLineJoin::ROUND);                                    // stroke-linejoin
         return text;
     }
+
     svg::Circle SvgMaker::MakeLabel(const SvgOption &options, const render::SphereProjector &svg_cordinates, const geo_math::Coordinates &point){
         svg::Circle lable;
 
@@ -155,17 +155,19 @@ namespace render
         lable.SetFillColor("white");
         return lable;
     }
+
     svg::Text SvgMaker::MakeStop(const std::string_view name, const SvgOption &options, const geo_math::Coordinates &point, const render::SphereProjector &svg_cordinates){
         svg::Text text;
 
         text.SetFillColor("black");                                                         // fill
         text.SetPosition(svg_cordinates(point));                                            // x,y
         text.SetOffset({options.stop_label_offset.at(0), options.stop_label_offset.at(1)}); // dx,dy
-        text.SetFontSize(options.stop_label_font_size);                                     // font-size
+        text.SetFontSize(static_cast<uint32_t>(options.stop_label_font_size));                                     // font-size
         text.SetFontFamily("Verdana");                                                      // font-family
         text.SetData(std::string(name));                                                    // text
         return text;
     }
+
     svg::Text SvgMaker::MakeBackStop(const std::string_view name, const SvgOption &options, const geo_math::Coordinates &point, const render::SphereProjector &svg_cordinates){
         svg::Text text;
 
@@ -176,7 +178,7 @@ namespace render
         text.SetStrokeLineJoin(StrokeLineJoin::ROUND);                                      // stroke-linejoin
         text.SetPosition(svg_cordinates(point));                                            // x,y
         text.SetOffset({options.stop_label_offset.at(0), options.stop_label_offset.at(1)}); // dx,dy
-        text.SetFontSize(options.stop_label_font_size);                                     // font-size
+        text.SetFontSize(static_cast<uint32_t>(options.stop_label_font_size));                                     // font-size
         text.SetFontFamily("Verdana");                                                      // font-family
         text.SetData(std::string(name));                                                    // text
         return text;

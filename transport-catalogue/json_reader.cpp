@@ -1,24 +1,23 @@
 #include "json_reader.h"
 
 namespace readJson{
-
-    void JsonReader::ParseDistance(json::Dict& dist, data_handler::stop_request& stop ){
+    void JsonReader::ParseDistance(json::Dict& dist, data_handler::Stop_request& stop ){
         for (const std::pair<const std::string, json::Node>& elem : dist){
            stop.distance[elem.first] = elem.second.AsInt();
         }
     }
 
-    data_handler::stop_request JsonReader::ParseStation(json::Dict &dict){   
+    data_handler::Stop_request JsonReader::ParseStation(json::Dict &dict){   
         json::Dict distance = dict.at("road_distances").AsMap();
-        data_handler::stop_request stop;
+        data_handler::Stop_request stop;
         stop.name = dict.at("name").AsString();
         stop.point = {dict.at("latitude").AsDouble(), dict.at("longitude").AsDouble()};
         ParseDistance(distance, stop); 
         return stop;
     }
 
-     data_handler::bus_request JsonReader::ParseBus(json::Dict& dict){
-        data_handler::bus_request bus;
+     data_handler::Bus_request JsonReader::ParseBus(json::Dict& dict){
+        data_handler::Bus_request bus;
         bus.name = dict.at("name").AsString();
         bus.is_roundtrip = dict.at("is_roundtrip").AsBool();
         json::Array stops = dict.at("stops").AsArray();
@@ -71,7 +70,6 @@ namespace readJson{
                 rgb.green =static_cast<uint8_t>(nodes.at(1).AsInt());
                 rgb.red = static_cast<uint8_t>(nodes.at(0).AsInt());
                 color = rgb;
-
             } else if (nodes.size() == 4){
                 svg::Rgba rgba;
                 rgba.opacity = nodes.at(3).AsDouble();
@@ -118,10 +116,10 @@ namespace readJson{
     void JsonReader::CreateJsonBus(std::vector<json::Node>& nodes, data_handler::AllInfo& data ){
         using namespace std::literals;
         std::pair<data_bus::InfoBus,int> answer = std::get<std::pair<data_bus::InfoBus,int>>(data);
-                if (answer.first.IsEmpty()){
+            if (answer.first.IsEmpty()){
                 json::Node dict_node{json::Dict{{"request_id"s, answer.second}, {"error_message"s, "not found"s}}};
                 nodes.push_back(dict_node);
-                } else {
+            } else {
                 json::Node dict_node{json::Dict{{"curvature"s, answer.first.curvature},
                                                 {"request_id"s, answer.second},
                                                 {"route_length"s, answer.first.distance},
@@ -129,7 +127,7 @@ namespace readJson{
                                                 {"unique_stop_count"s, static_cast<int>(answer.first.unique)}
                                                 }};
                 nodes.push_back(dict_node);
-                }
+            }
     }
 
      void JsonReader::CreateJsonStop(std::vector<json::Node>& nodes, data_handler::AllInfo& data ){
@@ -153,7 +151,7 @@ namespace readJson{
 
      void JsonReader::CreateJsonMap(std::vector<json::Node>& nodes, data_handler::AllInfo& data, handler::RequestHandler& saver ){
         using namespace std::literals;
-        data_handler::map_request answer = std::get<data_handler::map_request>(data);
+        data_handler::Map_request answer = std::get<data_handler::Map_request>(data);
         if (answer.answer){
             std::ostringstream svg;
             saver.MakeImage(svg);
@@ -171,7 +169,7 @@ namespace readJson{
                 CreateJsonBus(nodes, data);
             } else if (std::holds_alternative<std::pair<data_bus::InfoStop,int>>(data)){ //остановка
                 CreateJsonStop(nodes, data);
-            } else if (std::holds_alternative<data_handler::map_request>(data)){ //карта
+            } else if (std::holds_alternative<data_handler::Map_request>(data)){ //карта
                 CreateJsonMap(nodes, data, saver);
             }       
         } 
