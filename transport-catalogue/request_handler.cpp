@@ -58,8 +58,7 @@ namespace handler {
         return collect_answer;
     }
 
-    void RequestHandler::MakeImage(std::ostream& out)
-    {
+    void RequestHandler::MakeImage(std::ostream& out){
         data_bus::BusMap busses;
         data_bus::StopMap stops;
         

@@ -70,7 +70,6 @@ namespace json {
             }
         }
 
-
         std::string LoadS(std::istream& input){
             using namespace std::literals;    
             auto it = std::istreambuf_iterator<char>(input);
@@ -256,7 +255,7 @@ namespace json {
         return std::holds_alternative<double>(data_);
     } 
 
-    bool Node::IsDouble() const noexcept{
+    bool Node::IsDouble() const noexcept {
         if (IsInt() || IsPureDouble()){
             return true;
         }
@@ -347,7 +346,6 @@ namespace json {
             std::visit(swapper{text},data_);
         }  
     }
-
 
     inline std::ostream& operator<<(std::ostream& out , Array data){
         std::ostringstream text;

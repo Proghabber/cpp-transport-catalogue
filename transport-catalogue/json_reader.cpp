@@ -116,18 +116,18 @@ namespace readJson{
     void JsonReader::CreateJsonBus(std::vector<json::Node>& nodes, data_handler::AllInfo& data ){
         using namespace std::literals;
         std::pair<data_bus::InfoBus,int> answer = std::get<std::pair<data_bus::InfoBus,int>>(data);
-            if (answer.first.IsEmpty()){
-                json::Node dict_node{json::Dict{{"request_id"s, answer.second}, {"error_message"s, "not found"s}}};
-                nodes.push_back(dict_node);
-            } else {
-                json::Node dict_node{json::Dict{{"curvature"s, answer.first.curvature},
-                                                {"request_id"s, answer.second},
-                                                {"route_length"s, answer.first.distance},
-                                                {"stop_count"s, static_cast<int>(answer.first.amount)},
-                                                {"unique_stop_count"s, static_cast<int>(answer.first.unique)}
-                                                }};
-                nodes.push_back(dict_node);
-            }
+        if (answer.first.IsEmpty()){
+            json::Node dict_node{json::Dict{{"request_id"s, answer.second}, {"error_message"s, "not found"s}}};
+            nodes.push_back(dict_node);
+        } else {
+            json::Node dict_node{json::Dict{{"curvature"s, answer.first.curvature},
+                                            {"request_id"s, answer.second},
+                                            {"route_length"s, answer.first.distance},
+                                            {"stop_count"s, static_cast<int>(answer.first.amount)},
+                                            {"unique_stop_count"s, static_cast<int>(answer.first.unique)}
+                                            }};
+            nodes.push_back(dict_node);
+        }
     }
 
      void JsonReader::CreateJsonStop(std::vector<json::Node>& nodes, data_handler::AllInfo& data ){

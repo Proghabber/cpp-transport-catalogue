@@ -334,7 +334,6 @@ namespace svg {
         std::vector<std::unique_ptr<Object>> objects_;
     };
 
-
     class Drawable {
     public:
         virtual ~Drawable()=default;
@@ -344,7 +343,7 @@ namespace svg {
 
     }  // namespace svg
 
-    namespace shapes{
+namespace shapes{
     class Triangle:public svg::Drawable{
     public:
         Triangle(svg::Point p1, svg::Point p2, svg::Point p3);
