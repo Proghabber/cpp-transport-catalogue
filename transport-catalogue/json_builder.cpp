@@ -6,41 +6,38 @@ namespace json{
     {
     }
     
-
     Node::Value& Builder::GetCurrentValue(){
         if (nodes_.empty()) {
-        throw std::logic_error("Attempt to change finalized JSON");
+            throw std::logic_error("Attempt to change finalized JSON");
         }
         return nodes_.back()->GetValue();
-
     };
+
     const Node::Value& Builder::GetCurrentValue() const{
          return const_cast<Builder*>(this)->GetCurrentValue();
     };
 
     void Builder::AssertNewObjectContext() const{
         if (!std::holds_alternative<std::nullptr_t>(GetCurrentValue())) {
-        throw std::logic_error("New object in wrong context");
-    }
-
+            throw std::logic_error("New object in wrong context");
+        }
     };
+
     void Builder::AddObject(Node::Value value, bool one_shot){
         Node::Value& host_value = GetCurrentValue();
-        if (std::holds_alternative<Array>(host_value)){// если последний элемент array мы получим ссылку на этот array
+        if (std::holds_alternative<Array>(host_value)){
             Node& node
-            = std::get<Array>(host_value).emplace_back(std::move(value));// и тут же добавим элемент в него
-            if (!one_shot) { // если элемент который мы добавим dict или array (то есть мы его сразу откроем для записи)
-            nodes_.push_back(&node); // и добавим указатель на него в nodes_ 
-        }
+            = std::get<Array>(host_value).emplace_back(std::move(value));
+            if (!one_shot) { 
+            nodes_.push_back(&node); 
+            }
         } else {
-        AssertNewObjectContext(); //если последний элемент не пуст и не std::nullptr_t 
-        host_value = std::move(value);// мы туда пишем
-        if (one_shot) { // то есть  one_shot  значит единственный элкмент? Если это был всего единственный , тогда удаляется и крень.
-            nodes_.pop_back(); //а если не единственный? то это key который он обработал (записал) выше .Либо он end-ом чистит
+            AssertNewObjectContext(); 
+            host_value = std::move(value);
+            if (one_shot) { 
+                nodes_.pop_back(); 
+            }
         }
-    }
-
-        
     };
 
    BuilderContext Builder::Value(Node::Value input){
@@ -48,23 +45,17 @@ namespace json{
         return BuilderContext(*this);
     };
 
-    // BuilderContext Builder::Value(Node::Value input){
-    //     AddObject(input, true);
-    //     return BuilderContext{*this};
-    // };
-
     ContextArray Builder::StartArray(){
         AddObject(Array{}, false);
         return ContextArray(*this);
     };
 
     BuilderContext Builder::EndArray(){
-        if (!std::holds_alternative<Array>(GetCurrentValue())) {// так кстати проще
+        if (!std::holds_alternative<Array>(GetCurrentValue())) {
             throw std::logic_error("EndArray() outside a Array");
         }
         nodes_.pop_back();
         return BuilderContext(*this);
-
     };
 
     ContextDict Builder::StartDict(){
@@ -85,21 +76,18 @@ namespace json{
     
         if (!std::holds_alternative<Dict>(host_value)) {
             throw std::logic_error("Key() outside a dict");
-        }
-        
+        }  
         nodes_.push_back(
-            &std::get<Dict>(host_value)[std::move(key)]// точно и не надо Node создавать. Кстати проще
+            &std::get<Dict>(host_value)[std::move(key)]
         );
         return ContextKey(*this);
-
     };
 
     json::Node Builder::Build(){
-        if (!nodes_.empty()) { //вот почему он удалил корень. Чтоб просто на пустоту проверить. А не на длинну  и не надо было value грузить
+        if (!nodes_.empty()) { 
             throw std::logic_error("Attempt to build JSON which isn't finalized"); 
         }
         return std::move(nod_);
-
     };
 
     BuilderContext::BuilderContext(Builder &main): builder_(main)
@@ -111,30 +99,35 @@ namespace json{
     }
 
     BuilderContext BuilderContext::Value(Node::Value input){
-        // TODO: insert return statement here
         builder_.Value(input);
         return BuilderContext(builder_);
     }
+
     ContextArray BuilderContext::StartArray(){
         builder_.StartArray();
         return ContextArray(builder_);
     }
+
     BuilderContext BuilderContext::EndArray(){
         builder_.EndArray();
         return builder_;
     }
+
     ContextDict BuilderContext::StartDict(){
         builder_.StartDict();
         return ContextDict(builder_);
     }
+
    BuilderContext BuilderContext::EndDict(){
         builder_.EndDict();
         return builder_;
     }
+
     ContextKey BuilderContext::Key(std::string key){
         builder_.Key(key);
         return  (builder_);
     }
+
     json::Node BuilderContext::Build(){
         return builder_.Build();
     }
@@ -160,10 +153,8 @@ namespace json{
     {
     }
 
-    ContextValueKey ContextKey::Value(Node::Value input)
-    {
+    ContextValueKey ContextKey::Value(Node::Value input){
         builder_.Value(input);
         return ContextValueKey(builder_);
     }
-
 }

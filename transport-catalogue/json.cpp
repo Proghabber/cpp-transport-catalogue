@@ -20,7 +20,6 @@ std::string LoadLiteral(std::istream& input) {
 
 Node LoadArray(std::istream& input) {
     std::vector<Node> result;
-
     for (char c; input >> c && c != ']';) {
         if (c != ',') {
             input.putback(c);
@@ -35,7 +34,6 @@ Node LoadArray(std::istream& input) {
 
 Node LoadDict(std::istream& input) {
     Dict dict;
-
     for (char c; input >> c && c != '}';) {
         if (c == '"') {
             std::string key = LoadString(input).AsString();
@@ -101,7 +99,6 @@ Node LoadString(std::istream& input) {
         }
         ++it;
     }
-
     return Node(std::move(s));
 }
 

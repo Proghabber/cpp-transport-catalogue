@@ -10,7 +10,6 @@
 #include "request_handler.h"
 #include "json_builder.h"
 
-
 namespace readJson{
     class JsonReader{
     private:
