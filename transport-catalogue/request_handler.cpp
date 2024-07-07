@@ -6,13 +6,13 @@ namespace handler {
     }
 
     void RequestHandler::SaveRequest(data_handler::AllRequest&& requests){   
-        for (data_handler::Stop_request& stop: requests.stops){
+        for (data_handler::StopRequest& stop: requests.stops){
             db_.AddStop(stop.name,stop.point);
             for (std::pair<const std::string, int> dist: stop.distance){
                 db_.AddStopsDistance(stop.name, dist.first, dist.second);
             }
         }
-        for (data_handler::Bus_request& bus: requests.buses){
+        for (data_handler::BusRequest& bus: requests.buses){
             std::vector<std::string_view> result;
             result.reserve(bus.stops.size());
             auto fun = [](const std::string& stop) -> std::string_view {return stop;};
@@ -48,7 +48,7 @@ namespace handler {
                 object.second = id; 
                 answer = object; 
             } else if (req.type == "Map"){ 
-                data_handler::Map_request object; 
+                data_handler::MapRequest object; 
                 object.answer = true; 
                 object.id = req.id; 
                 answer = object; 

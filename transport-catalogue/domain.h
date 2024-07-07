@@ -46,26 +46,26 @@ namespace data_bus{
 }
 
 namespace data_handler{
-	struct Map_request{
+	struct MapRequest{
       int id;
       bool answer;
     };
 
-    struct Bus_request{
+    struct BusRequest{
         std::string name;
         bool is_roundtrip;
         std::vector<std::string> stops;
     };
 
-    struct Stop_request{
+    struct StopRequest{
 		std::string name;
 		geo_math::Coordinates point;
 		std::map<std::string, int> distance;
     };
 
     struct AllRequest{
-		std::vector<Bus_request> buses;
-		std::vector<Stop_request> stops;
+		std::vector<BusRequest> buses;
+		std::vector<StopRequest> stops;
     };
 
     struct RetRequest{
@@ -80,5 +80,5 @@ namespace data_handler{
 		int color_number = 0;
     }; 
 
-	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, Map_request>;
+	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, MapRequest>;
 }

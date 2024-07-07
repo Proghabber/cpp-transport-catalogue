@@ -8,14 +8,15 @@
 #include "map_renderer.h"
 #include "transport_catalogue.h"
 #include "request_handler.h"
+#include "json_builder.h"
 
 
 namespace readJson{
     class JsonReader{
     private:
-        data_handler::Stop_request ParseStation(json::Dict& dict); // вернет остановку и словарь становок с дистанцией до них
-        data_handler::Bus_request ParseBus(json::Dict& dict); // вернет маршрут его остановки и информацию о закольцованности
-        void ParseDistance(json::Dict& dist,data_handler::Stop_request& stop ); // заполнит словарь остановок и растояний для них вструктуре stop_request
+        data_handler::StopRequest ParseStation(json::Dict& dict); // вернет остановку и словарь становок с дистанцией до них
+        data_handler::BusRequest ParseBus(json::Dict& dict); // вернет маршрут его остановки и информацию о закольцованности
+        void ParseDistance(json::Dict& dist,data_handler::StopRequest& stop ); // заполнит словарь остановок и растояний для них вструктуре StopRequest
         void ParseInput(json::Array& array, handler::RequestHandler& saver); //заполнит структуру запросов на сохранение
         void ParseOutput(json::Array& array, handler::RequestHandler& saver); // распарсит и сохранит список запросов на вывот из транспорт
         void ParseRenderSetting(json::Dict& dict, handler::RequestHandler& saver); // распарсит и сохранит настройки изображения маршрута
