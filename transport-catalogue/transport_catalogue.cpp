@@ -3,7 +3,7 @@
 namespace catalogue{
     void TransportCatalogue::AddStop(const std::string& id ,geo_math::Coordinates point){
         auto name = std::find(name_stops_.begin(), name_stops_.end(), id);
-        if (name !=name_stops_.end() ){
+        if (name !=name_stops_.end()){
             data_bus::Stop stop(*name, point);
             stops_.push_back(stop); 
             stops_ptr_[*name] = &stops_.back();
@@ -12,7 +12,7 @@ namespace catalogue{
             data_bus::Stop stop(name_stops_.back(), point);
             stops_.push_back(stop); 
             stops_ptr_[name_stops_.back()] = &stops_.back();
-        }       
+        }      
     }
 
     void TransportCatalogue::AddBus(const std::string& bus, const std::vector<std::string_view>& stops, bool is_roundtrip){
@@ -74,13 +74,25 @@ namespace catalogue{
         return ReturnBusesWithStop(id);
     }
 
-    const std::unordered_map<std::string_view, data_bus::Bus>& TransportCatalogue::GetAllBus() const {
+    const data_bus::CollectBus& TransportCatalogue::GetAllBus() const {
         return buses_;
     }
 
     const std::unordered_map<std::string_view, data_bus::Stop *>& TransportCatalogue::GetAllstops() const {
         return stops_ptr_;
     }
+
+    int TransportCatalogue::GetStopsDistanse(std::string_view one, std::string_view two) const{
+        std::optional<int> distance = ReturnStopsDistance(one, two);
+        if (!distance){
+             distance = ReturnStopsDistance(two, one);
+            if (!distance){
+                return -1;
+             }
+        }
+        return *distance;
+    }
+
 
     data_bus::InfoStop TransportCatalogue::ReturnBusesWithStop(std::string_view id ) const {
         data_bus::InfoStop collect;
@@ -111,7 +123,8 @@ namespace catalogue{
     void TransportCatalogue::AddStopsDistance(std::string_view stop_one, std::string_view stop_two, int distance){
         size_t one = static_cast<size_t>(std::find(name_stops_.begin(), name_stops_.end(), stop_one)-name_stops_.begin());
         size_t two = static_cast<size_t>(std::find(name_stops_.begin(), name_stops_.end(), stop_two)-name_stops_.begin());
-        if (two>=name_stops_.size()){
+        
+        if (two >= name_stops_.size()){
             name_stops_.push_back(std::string(stop_two));
             std::pair<std::string_view,std::string_view> dist(name_stops_[one],name_stops_.back());
             stop_distance_[dist] = distance;
@@ -128,4 +141,6 @@ namespace catalogue{
         }
         return std::nullopt;
     }
+
+  
 }
