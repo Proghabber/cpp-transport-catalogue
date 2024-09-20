@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
-#include "geo.h"
 #include <cmath>
+
+#include "geo.h"
 
 namespace geo_math{
     bool  Coordinates::operator==(const Coordinates& other) const {

@@ -1,7 +1,4 @@
 #pragma once
-#include "geo.h"
-#include "svg.h"
-#include "domain.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -11,6 +8,10 @@
 #include <set>
 #include <map>
 #include <unordered_map>
+
+#include "geo.h"
+#include "svg.h"
+#include "domain.h"
 
 namespace render{
     struct SvgOption{

@@ -59,7 +59,6 @@ namespace json{
         json::Node Build() = delete;
     };
 
-
     class ContextDict:public BuilderContext{
     public:
         ContextDict(Builder &builder);
@@ -70,7 +69,6 @@ namespace json{
         json::Node Build() = delete;
     };
 
-   
     class Builder{
     private:
         json::Node nod_;

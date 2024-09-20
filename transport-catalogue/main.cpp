@@ -1,9 +1,7 @@
 #include <iostream>
-
 #include "json_reader.h"
 #include "request_handler.h"
 #include "transport_catalogue.h"
-#include "transport_router.h"
 
 using namespace std;
 
@@ -11,8 +9,7 @@ int main() {
     readJson::JsonReader readders;
     catalogue::TransportCatalogue transport;
     render::SvgMaker make;
-    transport_router::TransportRouter router(transport);
-    handler::RequestHandler handl(transport, make, readders, router);
+    handler::RequestHandler handl(transport, make, readders);
     handl.ReadJson(std::cin);
     handl.ReturnJson(std::cout);
 

@@ -1,7 +1,6 @@
 #include "json_builder.h"
 
 namespace json{
-
      Builder::Builder(): nod_(),nodes_{&nod_}
     {
     }
@@ -40,7 +39,7 @@ namespace json{
         }
     };
 
-   BuilderContext Builder::Value(Node::Value input){
+    BuilderContext Builder::Value(Node::Value input){
         AddObject(input, true);
         return BuilderContext(*this);
     };

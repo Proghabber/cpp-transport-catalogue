@@ -93,7 +93,6 @@ namespace catalogue{
         return *distance;
     }
 
-
     data_bus::InfoStop TransportCatalogue::ReturnBusesWithStop(std::string_view id ) const {
         data_bus::InfoStop collect;
         collect.name = stops_ptr_.at(id)->name;

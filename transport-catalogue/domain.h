@@ -8,6 +8,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <sstream> 
+
 #include "geo.h"
 
 namespace data_bus{
@@ -61,9 +62,9 @@ namespace data_bus{
 
 namespace data_handler{
 	struct MapRequest{
-      int id;
-      bool answer;
-	  std::ostringstream svg;
+		int id;
+		bool answer;
+		std::ostringstream svg;
     };
 
     struct BusRequest{
@@ -83,29 +84,25 @@ namespace data_handler{
 		std::vector<StopRequest> stops;
     };
 
-    struct RetRequest{
+    struct UniversalRequest{
 		int id;
-		std::string type;
-		std::string name;
+		std::string request_type;
+		std::string request_name;
 		std::string from;
 		std::string to;
     };
 
-	struct RoutResponse{
-		int id = 0;
+	struct RouteSearchResponse{
 		bool full = false;
 		double speed = 0.0;
 		double wait_time = 0.0;
 		double all_time_go = 0.0;
 		std::string massage;
-		std::string type;
-		std::string name;
-		std::string from;
-		std::string to;
 		std::vector<std::string_view> stops;
 		std::vector<std::string_view> buses;
 		std::vector<double> time_go;
 		std::vector<int> bus_stop_count;
+		UniversalRequest request_info;
 	};
 
     struct BusCollect{
@@ -114,11 +111,16 @@ namespace data_handler{
 		int color_number = 0;
     }; 
 
-	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, MapRequest, RoutResponse>;
+	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, MapRequest, RouteSearchResponse>;
 }
 
 namespace transport_router{
-	struct AdgeInfo {
+	struct RouteParameters{
+        int bus_wait_time = 0;
+		double bus_velocity = 0;
+    };
+
+	struct EdgeInfo{
         int stop_count = 0;
         std::string_view bus_name;
         std::string_view first_stop;

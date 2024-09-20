@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ranges.h"
-
 #include <cstdlib>
 #include <vector>
+
+#include "ranges.h"
 
 namespace graph {
 

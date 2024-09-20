@@ -1,7 +1,6 @@
 #include "map_renderer.h"
 
-namespace render{
-    
+namespace render{   
     bool IsZero(double value){
         return std::abs(value) < EPSILON;
     }

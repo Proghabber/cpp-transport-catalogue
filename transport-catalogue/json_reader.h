@@ -7,7 +7,7 @@
 #include "json.h"
 #include "map_renderer.h"
 #include "transport_catalogue.h"
-//#include "request_handler.h"
+#include "transport_router.h"
 #include "json_builder.h"
 
 namespace readJson{
@@ -16,7 +16,7 @@ namespace readJson{
         json::Array base_requests_;// базовые запросы
         json::Array stat_requests_;// запросы возврата ответа
         json::Dict render_setting_;// запросы настроек 
-        json::Dict routing_settings_;// запросы маршрута 
+        json::Dict router_settings_;// запросы маршрута 
 
 
         data_handler::StopRequest ParseStation(json::Dict& dict); // вернет остановку и словарь становок с дистанцией до них
@@ -32,9 +32,9 @@ namespace readJson{
     public:
         void ParseRequests(std::istream& input); //парсим все запросы  
         void ParseInput(data_handler::AllRequest& in_requests); //заполнит структуру запросов на сохранение
-        void ParseOutput(std::vector<data_handler::RetRequest>& out_requests); // распарсит и сохранит список запросов на вывод из транспорт
+        void ParseOutput(std::vector<data_handler::UniversalRequest>& out_requests); // распарсит и сохранит список запросов на вывод из транспорт
         void ParseRenderSetting(render::SvgOption& svg_options); // распарсит и сохранит настройки изображения маршрута
-        void ParseRoutsSettings(std::map<std::string, double>& routs_settings); //распарсит и сохранит настройки маршрутов
+        void ParseRoutsSettings(transport_router::RouteParameters& router_parametrs); //распарсит и сохранит настройки маршрутов
         
         void Print(std::ostream& output, const std::vector<data_handler::AllInfo>& answers); // создаст json с ответами и вернет его впоток
     };

@@ -16,7 +16,7 @@ namespace readJson{
         return stop;
     }
 
-     data_handler::BusRequest JsonReader::ParseBus(json::Dict& dict){
+    data_handler::BusRequest JsonReader::ParseBus(json::Dict& dict){
         data_handler::BusRequest bus;
         bus.name = dict.at("name").AsString();
         bus.is_roundtrip = dict.at("is_roundtrip").AsBool();
@@ -40,14 +40,14 @@ namespace readJson{
         }
     }
 
-   void JsonReader::ParseOutput(std::vector<data_handler::RetRequest>& out_requests){
+    void JsonReader::ParseOutput(std::vector<data_handler::UniversalRequest>& out_requests){
         for (const json::Node& dict: stat_requests_){ 
             json::Dict bus_map = dict.AsDict();
-            data_handler::RetRequest req;
+            data_handler::UniversalRequest req;
             req.id = bus_map.at("id").AsInt();
-            req.type =  bus_map.at("type").AsString();
+            req.request_type =  bus_map.at("type").AsString();
             if (bus_map.count("name")){
-                req.name = bus_map.at("name").AsString();
+                req.request_name = bus_map.at("name").AsString();
             }
             if (bus_map.count("from")){
                 req.from = bus_map.at("from").AsString();
@@ -106,9 +106,9 @@ namespace readJson{
         }
     }
 
-    void JsonReader::ParseRoutsSettings(std::map<std::string, double>& routs_settings){
-        routs_settings["bus_wait_time"] = routing_settings_.at("bus_wait_time").AsDouble();
-        routs_settings["bus_velocity"] = routing_settings_.at("bus_velocity").AsDouble();  
+    void JsonReader::ParseRoutsSettings(transport_router::RouteParameters& router_parametrs){
+        router_parametrs.bus_wait_time = router_settings_.at("bus_wait_time").AsInt();
+        router_parametrs.bus_velocity = router_settings_.at("bus_velocity").AsDouble();  
     }
 
     void JsonReader::CreateJsonBus(std::vector<json::Node>& nodes,const data_handler::AllInfo& data ){
@@ -138,7 +138,7 @@ namespace readJson{
         }
     }
 
-     void JsonReader::CreateJsonStop(std::vector<json::Node>& nodes, const data_handler::AllInfo& data){
+    void JsonReader::CreateJsonStop(std::vector<json::Node>& nodes, const data_handler::AllInfo& data){
         using namespace std::literals;
         std::pair<data_bus::InfoStop,int> response = std::get<std::pair<data_bus::InfoStop,int>>(data);
         if (response.first.name == ""){
@@ -156,8 +156,8 @@ namespace readJson{
                                         .Key("buses"s).StartArray()
                                                     .EndArray()
                                         .Key("request_id"s).Value(response.second)
-                                        .EndDict()
-                                        .Build()
+                                    .EndDict()
+                                    .Build()
                                     };
             nodes.push_back(dict_node);
         } else if (!response.first.IsEmpty()){
@@ -176,7 +176,7 @@ namespace readJson{
         }
      }
 
-     void JsonReader::CreateJsonMap(std::vector<json::Node>& nodes,const data_handler::AllInfo& data){
+    void JsonReader::CreateJsonMap(std::vector<json::Node>& nodes,const data_handler::AllInfo& data){
         using namespace std::literals;
         const data_handler::MapRequest& response = std::get<data_handler::MapRequest>(data);
         if (response.answer){
@@ -192,13 +192,13 @@ namespace readJson{
         }
      }
 
-     void JsonReader::CreateJsonRout(std::vector<json::Node> &nodes,const data_handler::AllInfo& data){
+    void JsonReader::CreateJsonRout(std::vector<json::Node> &nodes,const data_handler::AllInfo& data){
         using namespace std::literals;
-        const data_handler::RoutResponse& response = std::get<data_handler::RoutResponse>(data);
+        const data_handler::RouteSearchResponse& response = std::get<data_handler::RouteSearchResponse>(data);
         if (!response.full){
             json::Node dict_node = {json::Builder{}
                                     .StartDict()
-                                        .Key("request_id"s).Value(response.id)
+                                        .Key("request_id"s).Value(response.request_info.id)
                                         .Key("error_message").Value(response.massage)
                                     .EndDict()
                                     .Build()
@@ -209,19 +209,19 @@ namespace readJson{
             for (size_t index = 0; index < response.bus_stop_count.size(); index++){
                 json::Node dict_stop = {json::Builder{}
                                     .StartDict()
-                                    .Key("stop_name").Value(std::string(response.stops.at(index)))
-                                    .Key("time").Value(response.wait_time)
-                                    .Key("type").Value("Wait")
+                                        .Key("stop_name").Value(std::string(response.stops.at(index)))
+                                        .Key("time").Value(response.wait_time)
+                                        .Key("type").Value("Wait")
                                     .EndDict()
                                     .Build()
                                     };
                 sub_nodes.push_back(dict_stop);
                 json::Node dict_bus = {json::Builder{}
                                     .StartDict()
-                                    .Key("bus").Value(std::string(response.buses.at(index)))
-                                    .Key("span_count").Value(response.bus_stop_count.at(index))
-                                    .Key("time").Value(response.time_go.at(index))
-                                    .Key("type").Value("Bus")
+                                        .Key("bus").Value(std::string(response.buses.at(index)))
+                                        .Key("span_count").Value(response.bus_stop_count.at(index))
+                                        .Key("time").Value(response.time_go.at(index))
+                                        .Key("type").Value("Bus")
                                     .EndDict()
                                     .Build()        
                                     };
@@ -229,7 +229,7 @@ namespace readJson{
             }
             json::Node dict_node = {json::Builder{}
                                     .StartDict()
-                                        .Key("request_id").Value(response.id)
+                                        .Key("request_id").Value(response.request_info.id)
                                         .Key("total_time").Value(response.all_time_go)
                                         .Key("items"s).Value(sub_nodes)
                                     .EndDict()
@@ -239,7 +239,7 @@ namespace readJson{
         }
      }
 
-     json::Node  JsonReader::ReturnAnswer(const std::vector<data_handler::AllInfo>& responses){
+    json::Node  JsonReader::ReturnAnswer(const std::vector<data_handler::AllInfo>& responses){
         std::vector<json::Node> nodes;
         for (const data_handler::AllInfo& response: responses){
             if (std::holds_alternative<std::pair<data_bus::InfoBus,int>>(response)){ //автобус
@@ -248,7 +248,7 @@ namespace readJson{
                 CreateJsonStop(nodes, response);
             } else if (std::holds_alternative<data_handler::MapRequest>(response)){ //карта
                 CreateJsonMap(nodes, response);
-            } else if (std::holds_alternative<data_handler::RoutResponse>(response)){ // маршрут, который надо нарисовать по двум остановкам
+            } else if (std::holds_alternative<data_handler::RouteSearchResponse>(response)){ // маршрут, который надо нарисовать по двум остановкам
                 CreateJsonRout(nodes, response);
             }            
         } 
@@ -263,13 +263,13 @@ namespace readJson{
         output<<out.str();
     }
 
-      void JsonReader::ParseRequests(std::istream& input){
+    void JsonReader::ParseRequests(std::istream& input){
         json::Document doc = json::Load(input);//создаем документ из  обьекта
         json::Dict dict = doc.GetRoot().AsDict();//получаем мап 
         base_requests_ = dict.at("base_requests").AsArray();// базовые запросы
         stat_requests_ = dict.at("stat_requests").AsArray();// запросы возврата ответа
         render_setting_ = dict.at("render_settings").AsDict();// запросы настроек 
-        routing_settings_ = dict.at("routing_settings").AsDict();// запросы маршрута 
+        router_settings_ = dict.at("routing_settings").AsDict();// запросы маршрута 
     }
 }
 
