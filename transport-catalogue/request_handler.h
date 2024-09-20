@@ -13,7 +13,7 @@
 namespace handler {
     class RequestHandler {
     public:
-        RequestHandler(catalogue::TransportCatalogue& db, render::SvgMaker& map, readJson::JsonReader& json, transport_router::Transport_Router& rout);
+        RequestHandler(catalogue::TransportCatalogue& db, render::SvgMaker& map, readJson::JsonReader& json, transport_router::TransportRouter& rout);
         void ReadJson(std::istream& input);
         void ReturnJson(std::ostream& output);
         const std::map<std::string, double> GetRoutSettings() const;
@@ -21,7 +21,7 @@ namespace handler {
         catalogue::TransportCatalogue& db_;
         render::SvgMaker& renderer_;
         readJson::JsonReader& reader_;
-        transport_router::Transport_Router& router_;
+        transport_router::TransportRouter& router_;
 
         render::SvgOption svg_options_;
         std::map<std::string, double> rout_settings_;

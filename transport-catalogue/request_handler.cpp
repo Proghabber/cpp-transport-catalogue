@@ -1,7 +1,7 @@
 #include "request_handler.h"
 
 namespace handler {
-    RequestHandler::RequestHandler(catalogue::TransportCatalogue &db, render::SvgMaker &map, readJson::JsonReader& json, transport_router::Transport_Router& rout):db_(db), renderer_(map), reader_(json), router_(rout)
+    RequestHandler::RequestHandler(catalogue::TransportCatalogue &db, render::SvgMaker &map, readJson::JsonReader& json, transport_router::TransportRouter& rout):db_(db), renderer_(map), reader_(json), router_(rout)
     {
     }
 

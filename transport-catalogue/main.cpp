@@ -11,7 +11,7 @@ int main() {
     readJson::JsonReader readders;
     catalogue::TransportCatalogue transport;
     render::SvgMaker make;
-    transport_router::Transport_Router router(transport);
+    transport_router::TransportRouter router(transport);
     handler::RequestHandler handl(transport, make, readders, router);
     handl.ReadJson(std::cin);
     handl.ReturnJson(std::cout);

@@ -1,20 +1,20 @@
 #include "transport_router.h"
 namespace transport_router{ 
-    Transport_Router::Transport_Router(const catalogue::TransportCatalogue& db): transport_(db) 
+    TransportRouter::TransportRouter(const catalogue::TransportCatalogue& db): transport_(db) 
     {
     }
 
-    void Transport_Router::SetSettings(std::map<std::string, double>& settings){
+    void TransportRouter::SetSettings(std::map<std::string, double>& settings){
         rout_settings_ = settings;
     }
 
-    void Transport_Router::FullGraph(){
+    void TransportRouter::FullGraph(){
             graph_ = std::make_unique<graph::DirectedWeightedGraph<double>>(CreateGraph());
             graph::Router<double> rout(*graph_.get());
             rout_ = std::make_unique<graph::Router<double>>(rout);
     }
 
-    data_handler::RoutResponse Transport_Router::FindPath(const data_handler::RetRequest& request){ 
+    data_handler::RoutResponse TransportRouter::FindPath(const data_handler::RetRequest& request){ 
         auto path = rout_->BuildRoute(stops_index_.at(request.from), stops_index_.at(request.to));
         if(!path.has_value()){
             data_handler::RoutResponse response;
@@ -27,7 +27,7 @@ namespace transport_router{
         }
     }
 
-    void Transport_Router::FullStops(const data_bus::CollectStops& all_stops){
+    void TransportRouter::FullStops(const data_bus::CollectStops& all_stops){
         for (auto stop: all_stops){
             stops_.push_back(stop.first);
             size_t index = stops_.size()-1;
@@ -35,7 +35,7 @@ namespace transport_router{
         }    
     }
 
-    graph::Edge<double> Transport_Router::EdgeStop(std::string_view stop_name){
+    graph::Edge<double> TransportRouter::EdgeStop(std::string_view stop_name){
         size_t from_index = stops_index_.at(stop_name);
         graph::Edge<double> edge;
         edge.weight = rout_settings_.at("bus_wait_time");
@@ -44,7 +44,7 @@ namespace transport_router{
         return edge;
     }
 
-    graph::Edge<double> Transport_Router::EdgeBus(std::pair<std::string_view, std::string_view> path, const double distance){
+    graph::Edge<double> TransportRouter::EdgeBus(std::pair<std::string_view, std::string_view> path, const double distance){
         const double metres = 1000.0;
         const double minuts = 60.0;
         double speed = rout_settings_.at("bus_velocity");
@@ -58,7 +58,7 @@ namespace transport_router{
         return edge;
     }
 
-    graph::Edge<double> Transport_Router::Transport_Router::CreateAdge(std::pair<std::string_view, std::string_view> path, double distance){
+    graph::Edge<double> TransportRouter::CreateAdge(std::pair<std::string_view, std::string_view> path, double distance){
         graph::Edge<double> edge;
         if (distance <= 0){
             edge = EdgeStop(path.first);
@@ -68,7 +68,7 @@ namespace transport_router{
         return edge;
     }
 
-    void Transport_Router::GoToEnd(graph::DirectedWeightedGraph<double>& graph, StopIter parent, std::string_view bus, StopIter end){
+    void TransportRouter::GoToEnd(graph::DirectedWeightedGraph<double>& graph, StopIter parent, std::string_view bus, StopIter end){
         int stops_count = 0; 
         double all_dist = 0;
         for (auto next_stop = next(parent, 1); next_stop != end; next_stop++){
@@ -79,7 +79,7 @@ namespace transport_router{
         }
     }
 
-    void Transport_Router::GoToBegin(graph::DirectedWeightedGraph<double>& graph, StopIter parent, std::string_view bus, StopIter begin){
+    void TransportRouter::GoToBegin(graph::DirectedWeightedGraph<double>& graph, StopIter parent, std::string_view bus, StopIter begin){
         int stops_count = 0; 
         double all_dist = 0;
         for (auto prev_stop = prev(parent, 1); prev_stop >= begin; prev_stop--){
@@ -90,7 +90,7 @@ namespace transport_router{
         }
     }
 
-    graph::DirectedWeightedGraph<double> Transport_Router::CreateGraph(){ 
+    graph::DirectedWeightedGraph<double> TransportRouter::CreateGraph(){ 
         const data_bus::CollectBus& all_bus = transport_.GetAllBus();
         const data_bus::CollectStops& all_stops = transport_.GetAllstops();
         graph::DirectedWeightedGraph<double>  graph(all_stops.size());
@@ -113,7 +113,7 @@ namespace transport_router{
         return graph;
     }
 
-    data_handler::RoutResponse Transport_Router::MakePath(EdgeIter begin, EdgeIter end){
+    data_handler::RoutResponse TransportRouter::MakePath(EdgeIter begin, EdgeIter end){
         data_handler::RoutResponse response;
         response.full = true;
         if (begin == end){ 

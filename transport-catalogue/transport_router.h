@@ -10,9 +10,9 @@
 
 
 namespace transport_router{ 
-    class Transport_Router {
+    class TransportRouter {
     public:
-        Transport_Router(const catalogue::TransportCatalogue& db);
+        TransportRouter(const catalogue::TransportCatalogue& db);
         void SetSettings(std::map<std::string, double>& settings);
         void FullGraph();
         data_handler::RoutResponse FindPath(const data_handler::RetRequest& request);
