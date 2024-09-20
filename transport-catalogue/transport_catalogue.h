@@ -38,7 +38,6 @@ namespace catalogue{
 		data_bus::InfoStop FindStop(std::string_view id) const;	
 		const data_bus::CollectBus& GetAllBus() const;
 		const data_bus::CollectStops& GetAllstops() const;
-		int GetStopsDistanse(std::string_view one, std::string_view two) const;
-		
+		int GetStopsDistanse(std::string_view one, std::string_view two) const;		
 	};
 }

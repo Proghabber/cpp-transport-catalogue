@@ -1,7 +1,8 @@
 #pragma once
 #include "transport_catalogue.h"
 #include "map_renderer.h"
-//#include "transport_router.h"
+#include "transport_router.h"
+#include "json_reader.h"
 #include <optional>
 #include <unordered_map>
 #include <string>
@@ -12,30 +13,30 @@
 namespace handler {
     class RequestHandler {
     public:
-        RequestHandler(catalogue::TransportCatalogue& db, render::SvgMaker& map);
-        void FullTransport(data_handler::AllRequest&& requests); //заполнит транспорт 
-        void SaveAnswers(std::vector<data_handler::RetRequest>&& requests_vec); //сохранит ответы (понадобится для создания Json  или xml ответа)
-        void SaveSvgOption(render::SvgOption&& requests_svg); //сохранит настройки изображения
-        std::vector<data_handler::AllInfo> GetAnswers(); // создаст и вернет вектор ответов из транспорт
-        void MakeImage(std::ostream& out);
-        //
-        void SaveRoutSettings(std::map<std::string, double>&& set_rout);
+        RequestHandler(catalogue::TransportCatalogue& db, render::SvgMaker& map, readJson::JsonReader& json, transport_router::Transport_Router& rout);
+        void ReadJson(std::istream& input);
+        void ReturnJson(std::ostream& output);
         const std::map<std::string, double> GetRoutSettings() const;
-        const data_bus::CollectStops& GetAllStops() const;
-        const data_bus::CollectBus& GetAllBus() const;
-        double GetStopsDist(std::string_view from, std::string_view to) const;
-        void SavePath(data_handler::RoutAnswer path, int id);
-        std::vector<data_handler::RetRequest>& RetRequests();
-        
-
     private:
         catalogue::TransportCatalogue& db_;
         render::SvgMaker& renderer_;
+        readJson::JsonReader& reader_;
+        transport_router::Transport_Router& router_;
+
         render::SvgOption svg_options_;
         std::map<std::string, double> rout_settings_;
-        std::map<int, data_handler::RoutAnswer> rout_answers_; // 
+        
+        data_handler::AllRequest in_transport_ ; // запросы для транспорта ввод
         std::vector<data_handler::AllInfo> collect_answer_;// ответы на запросы
-        std::vector<data_handler::RetRequest> out_requests_; // все запросы на вывод из транспорт 
+        std::vector<data_handler::RetRequest> out_requests_; // все запросы на вывод
+
+        std::ostringstream MakeImage();
+        void FullTransport();
+        std::pair<data_bus::InfoStop,int> GetStopResponse(const data_handler::RetRequest& request);
+        std::pair<data_bus::InfoBus,int> GetBusResponse (const data_handler::RetRequest& request);
+        data_handler::MapRequest GetMapResponse(const data_handler::RetRequest& request);
+        data_handler::RoutResponse GetRoutResponse(const data_handler::RetRequest& request);
+        void GetResponses();
          
         
     };

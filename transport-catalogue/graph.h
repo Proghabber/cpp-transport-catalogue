@@ -23,42 +23,6 @@ struct Edge {
     VertexId from;
     VertexId to;
     Weight weight;
-    std::string_view bus;
-    std::string_view first_stop;
-    int count_stop = 0;
-    double bus_wait_time = 0.0;
-    double bus_velocity = 0.0;
-
-    void SetPoints(const VertexId start, const VertexId finish){
-        from = start;
-        to = finish;
-    }
-
-    void SetDistance(const Weight distance){
-        weight = distance;
-    }
-
-    void SetInfoBus(std::string_view name, const int stops_count, const double speed){
-        bus = name;
-        count_stop = stops_count;
-        bus_velocity = speed;
-    }
-
-    void SetInfoStop(std::string_view name_stop, const double wait_time){
-        first_stop = name_stop;
-        bus_wait_time = wait_time;
-    }
-
-    void CountWeight(){
-        if (weight > 0){
-            const double metres = 1000.0;
-            const double minuts = 60.0;
-            weight = (weight / metres / bus_velocity * minuts) + bus_wait_time;
-
-        } else { 
-            weight = bus_wait_time;
-        };
-    }
 };
 
 

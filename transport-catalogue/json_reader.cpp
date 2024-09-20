@@ -27,9 +27,8 @@ namespace readJson{
         return bus;
     }
 
-    void JsonReader::ParseInput(json::Array &array, handler::RequestHandler& saver){       
-        data_handler::AllRequest in_requests;
-        for(const auto& dict : array){
+    void JsonReader::ParseInput(data_handler::AllRequest& in_requests){       
+        for(const auto& dict : base_requests_){
             if (dict.AsDict().at("type").AsString() == "Bus"){
                 json::Dict bus_map = dict.AsDict();
                 in_requests.buses.push_back(ParseBus(bus_map));             
@@ -39,14 +38,10 @@ namespace readJson{
                 in_requests.stops.push_back(ParseStation(stop_map));                 
             }         
         }
-        //saver.InitGraph(in_requests.stops);
-        
-        saver.FullTransport(std::move(in_requests));
     }
 
-   void JsonReader::ParseOutput(json::Array& array, handler::RequestHandler& saver){
-       std::vector<data_handler::RetRequest> out_requests;
-        for (const json::Node& dict: array){ 
+   void JsonReader::ParseOutput(std::vector<data_handler::RetRequest>& out_requests){
+        for (const json::Node& dict: stat_requests_){ 
             json::Dict bus_map = dict.AsDict();
             data_handler::RetRequest req;
             req.id = bus_map.at("id").AsInt();
@@ -62,7 +57,6 @@ namespace readJson{
             }      
             out_requests.push_back(req);       
         }
-        saver.SaveAnswers(std::move(out_requests));
     }
 
     svg::Color JsonReader::ToColor(json::Node& node){
@@ -90,38 +84,34 @@ namespace readJson{
         return color;
     }
 
-    void JsonReader::ParseRenderSetting(json::Dict& dict, handler::RequestHandler& saver){   
-        render::SvgOption svg_options; 
-        svg_options.width = dict.at("width").AsDouble();
-        svg_options.height = dict.at("height").AsDouble();
-        svg_options.padding = dict.at("padding").AsDouble();
-        svg_options.stop_radius = dict.at("stop_radius").AsDouble();
-        svg_options.line_width = dict.at("line_width").AsDouble();
-        svg_options.bus_label_font_size = dict.at("bus_label_font_size").AsInt();
-        svg_options.stop_label_font_size = dict.at("stop_label_font_size").AsInt();
+    void JsonReader::ParseRenderSetting(render::SvgOption& svg_options){    
+        svg_options.width = render_setting_.at("width").AsDouble();
+        svg_options.height = render_setting_.at("height").AsDouble();
+        svg_options.padding = render_setting_.at("padding").AsDouble();
+        svg_options.stop_radius = render_setting_.at("stop_radius").AsDouble();
+        svg_options.line_width = render_setting_.at("line_width").AsDouble();
+        svg_options.bus_label_font_size = render_setting_.at("bus_label_font_size").AsInt();
+        svg_options.stop_label_font_size = render_setting_.at("stop_label_font_size").AsInt();
         
-        svg_options.underlayer_width = dict.at("underlayer_width").AsDouble(); 
-        svg_options.underlayer_color = ToColor(dict.at("underlayer_color"));
-        for (json::Node nod : dict.at("color_palette").AsArray()){
+        svg_options.underlayer_width = render_setting_.at("underlayer_width").AsDouble(); 
+        svg_options.underlayer_color = ToColor(render_setting_.at("underlayer_color"));
+        for (json::Node nod : render_setting_.at("color_palette").AsArray()){
             svg_options.color_palette.push_back(ToColor(nod));
         }
-        for (json::Node nod : dict.at("bus_label_offset").AsArray()){
+        for (json::Node nod : render_setting_.at("bus_label_offset").AsArray()){
             svg_options.bus_label_offset.push_back(nod.AsDouble());
         }
-        for (json::Node nod : dict.at("stop_label_offset").AsArray()){
+        for (json::Node nod : render_setting_.at("stop_label_offset").AsArray()){
             svg_options.stop_label_offset.push_back(nod.AsDouble());
         }
-        saver.SaveSvgOption(std::move(svg_options));
     }
 
-    void JsonReader::ParseRoutsSettings(json::Dict& dict, handler::RequestHandler& saver){
-        std::map<std::string, double> routs_settings;
-        routs_settings["bus_wait_time"] = dict.at("bus_wait_time").AsDouble();
-        routs_settings["bus_velocity"] = dict.at("bus_velocity").AsDouble();
-        saver.SaveRoutSettings(std::move(routs_settings));    
+    void JsonReader::ParseRoutsSettings(std::map<std::string, double>& routs_settings){
+        routs_settings["bus_wait_time"] = routing_settings_.at("bus_wait_time").AsDouble();
+        routs_settings["bus_velocity"] = routing_settings_.at("bus_velocity").AsDouble();  
     }
 
-    void JsonReader::CreateJsonBus(std::vector<json::Node>& nodes, data_handler::AllInfo& data ){
+    void JsonReader::CreateJsonBus(std::vector<json::Node>& nodes,const data_handler::AllInfo& data ){
         using namespace std::literals;
         std::pair<data_bus::InfoBus,int> answer = std::get<std::pair<data_bus::InfoBus,int>>(data);
         if (answer.first.IsEmpty()){
@@ -148,37 +138,37 @@ namespace readJson{
         }
     }
 
-     void JsonReader::CreateJsonStop(std::vector<json::Node>& nodes, data_handler::AllInfo& data ){
+     void JsonReader::CreateJsonStop(std::vector<json::Node>& nodes, const data_handler::AllInfo& data){
         using namespace std::literals;
-        std::pair<data_bus::InfoStop,int> answer = std::get<std::pair<data_bus::InfoStop,int>>(data);
-        if (answer.first.name == ""){
+        std::pair<data_bus::InfoStop,int> response = std::get<std::pair<data_bus::InfoStop,int>>(data);
+        if (response.first.name == ""){
             json::Node dict_node = {json::Builder{}
                                     .StartDict()
-                                        .Key("request_id"s).Value(answer.second)
+                                        .Key("request_id"s).Value(response.second)
                                         .Key("error_message"s).Value("not found"s)
                                     .EndDict()
                                     .Build()
                                     };
             nodes.push_back(dict_node);
-        } else if (answer.first.IsEmpty()){
+        } else if (response.first.IsEmpty()){
             json::Node dict_node = {json::Builder{}
                                     .StartDict()
                                         .Key("buses"s).StartArray()
                                                     .EndArray()
-                                        .Key("request_id"s).Value(answer.second)
+                                        .Key("request_id"s).Value(response.second)
                                         .EndDict()
                                         .Build()
                                     };
             nodes.push_back(dict_node);
-        } else if (!answer.first.IsEmpty()){
+        } else if (!response.first.IsEmpty()){
                 json::Array buses_arr;
-                for (const std::string_view stop_name : answer.first.stops){
+                for (const std::string_view stop_name : response.first.stops){
                     buses_arr.push_back(std::string(stop_name));
                 }
                 json::Node dict_node = {json::Builder{}
                                         .StartDict()
                                             .Key("buses"s).Value(buses_arr)
-                                            .Key("request_id"s).Value(answer.second)
+                                            .Key("request_id"s).Value(response.second)
                                         .EndDict()
                                         .Build()
                                         };
@@ -186,16 +176,15 @@ namespace readJson{
         }
      }
 
-     void JsonReader::CreateJsonMap(std::vector<json::Node>& nodes, data_handler::AllInfo& data, handler::RequestHandler& saver ){
+     void JsonReader::CreateJsonMap(std::vector<json::Node>& nodes,const data_handler::AllInfo& data){
         using namespace std::literals;
-        data_handler::MapRequest answer = std::get<data_handler::MapRequest>(data);
-        if (answer.answer){
-            std::ostringstream svg;
-            saver.MakeImage(svg);
+        const data_handler::MapRequest& response = std::get<data_handler::MapRequest>(data);
+        if (response.answer){
+            
             json::Node dict_node = {json::Builder{}
                                     .StartDict()
-                                        .Key("map"s).Value(svg.str())
-                                        .Key("request_id"s).Value(answer.id)
+                                        .Key("map"s).Value(response.svg.str())
+                                        .Key("request_id"s).Value(response.id)
                                     .EndDict()
                                     .Build()
                                     };
@@ -203,25 +192,25 @@ namespace readJson{
         }
      }
 
-     void JsonReader::CreateJsonRout(std::vector<json::Node> &nodes, data_handler::AllInfo &data){
+     void JsonReader::CreateJsonRout(std::vector<json::Node> &nodes,const data_handler::AllInfo& data){
         using namespace std::literals;
-        data_handler::RoutAnswer answer = std::get<data_handler::RoutAnswer>(data);
-        if (!answer.full){
+        const data_handler::RoutResponse& response = std::get<data_handler::RoutResponse>(data);
+        if (!response.full){
             json::Node dict_node = {json::Builder{}
                                     .StartDict()
-                                        .Key("request_id"s).Value(answer.id)
-                                        .Key("error_message").Value(answer.massage)
+                                        .Key("request_id"s).Value(response.id)
+                                        .Key("error_message").Value(response.massage)
                                     .EndDict()
                                     .Build()
                                     };
             nodes.push_back(dict_node);
         } else {
             std::vector<json::Node> sub_nodes;
-            for (size_t index = 0; index < answer.bus_stop_count.size(); index++){
+            for (size_t index = 0; index < response.bus_stop_count.size(); index++){
                 json::Node dict_stop = {json::Builder{}
                                     .StartDict()
-                                    .Key("stop_name").Value(std::string(answer.stops.at(index)))
-                                    .Key("time").Value(answer.wait_time)
+                                    .Key("stop_name").Value(std::string(response.stops.at(index)))
+                                    .Key("time").Value(response.wait_time)
                                     .Key("type").Value("Wait")
                                     .EndDict()
                                     .Build()
@@ -229,9 +218,9 @@ namespace readJson{
                 sub_nodes.push_back(dict_stop);
                 json::Node dict_bus = {json::Builder{}
                                     .StartDict()
-                                    .Key("bus").Value(std::string(answer.buses.at(index)))
-                                    .Key("span_count").Value(answer.bus_stop_count.at(index))
-                                    .Key("time").Value(answer.time_go.at(index))
+                                    .Key("bus").Value(std::string(response.buses.at(index)))
+                                    .Key("span_count").Value(response.bus_stop_count.at(index))
+                                    .Key("time").Value(response.time_go.at(index))
                                     .Key("type").Value("Bus")
                                     .EndDict()
                                     .Build()        
@@ -240,8 +229,8 @@ namespace readJson{
             }
             json::Node dict_node = {json::Builder{}
                                     .StartDict()
-                                        .Key("request_id").Value(answer.id)
-                                        .Key("total_time").Value(answer.all_time_go)
+                                        .Key("request_id").Value(response.id)
+                                        .Key("total_time").Value(response.all_time_go)
                                         .Key("items"s).Value(sub_nodes)
                                     .EndDict()
                                     .Build()
@@ -250,43 +239,37 @@ namespace readJson{
         }
      }
 
-     json::Node  JsonReader::ReturnAnswer(handler::RequestHandler& saver){
+     json::Node  JsonReader::ReturnAnswer(const std::vector<data_handler::AllInfo>& responses){
         std::vector<json::Node> nodes;
-        std::vector<data_handler::AllInfo> answers = saver.GetAnswers();
-        for (data_handler::AllInfo& data: answers){
-            if (std::holds_alternative<std::pair<data_bus::InfoBus,int>>(data)){ //автобус
-                CreateJsonBus(nodes, data);
-            } else if (std::holds_alternative<std::pair<data_bus::InfoStop,int>>(data)){ //остановка
-                CreateJsonStop(nodes, data);
-            } else if (std::holds_alternative<data_handler::MapRequest>(data)){ //карта
-                CreateJsonMap(nodes, data, saver);
-            } else if (std::holds_alternative<data_handler::RoutAnswer>(data)){ // маршрут, который надо нарисовать по двум остановкам
-                CreateJsonRout(nodes, data);
+        for (const data_handler::AllInfo& response: responses){
+            if (std::holds_alternative<std::pair<data_bus::InfoBus,int>>(response)){ //автобус
+                CreateJsonBus(nodes, response);
+            } else if (std::holds_alternative<std::pair<data_bus::InfoStop,int>>(response)){ //остановка
+                CreateJsonStop(nodes, response);
+            } else if (std::holds_alternative<data_handler::MapRequest>(response)){ //карта
+                CreateJsonMap(nodes, response);
+            } else if (std::holds_alternative<data_handler::RoutResponse>(response)){ // маршрут, который надо нарисовать по двум остановкам
+                CreateJsonRout(nodes, response);
             }            
         } 
         json::Node json{nodes};
         return json;
     }
 
-    void JsonReader::Print(std::ostream& output, handler::RequestHandler& saver){
+    void JsonReader::Print(std::ostream& output, const std::vector<data_handler::AllInfo>& responses){
         std::ostringstream out;
-        json::Node node = ReturnAnswer(saver);
+        json::Node node = ReturnAnswer(responses);
         json::Print(json::Document{node}, out);
         output<<out.str();
     }
 
-      void JsonReader::ParseRequests(std::istream& input, handler::RequestHandler& saver){
+      void JsonReader::ParseRequests(std::istream& input){
         json::Document doc = json::Load(input);//создаем документ из  обьекта
         json::Dict dict = doc.GetRoot().AsDict();//получаем мап 
-        json::Array base_requests = dict.at("base_requests").AsArray();// базовые запросы
-        json::Array stat_requests = dict.at("stat_requests").AsArray();// запросы возврата ответа
-        json::Dict render_setting = dict.at("render_settings").AsDict();// запросы настроек 
-        json::Dict routing_settings = dict.at("routing_settings").AsDict();// запросы маршрута 
-        //____________________________________________________________________
-        ParseInput(base_requests, saver);// парсим запрос базовый 
-        ParseOutput(stat_requests, saver);// парсим запрос на возврат ответа
-        ParseRenderSetting(render_setting, saver);// парсим настройки изображения
-        ParseRoutsSettings(routing_settings, saver); //парсим настройки маршрута
+        base_requests_ = dict.at("base_requests").AsArray();// базовые запросы
+        stat_requests_ = dict.at("stat_requests").AsArray();// запросы возврата ответа
+        render_setting_ = dict.at("render_settings").AsDict();// запросы настроек 
+        routing_settings_ = dict.at("routing_settings").AsDict();// запросы маршрута 
     }
 }
 

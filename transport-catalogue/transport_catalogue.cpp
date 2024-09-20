@@ -141,6 +141,4 @@ namespace catalogue{
         }
         return std::nullopt;
     }
-
-  
 }

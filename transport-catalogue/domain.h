@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <sstream> 
 #include "geo.h"
 
 namespace data_bus{
@@ -62,6 +63,7 @@ namespace data_handler{
 	struct MapRequest{
       int id;
       bool answer;
+	  std::ostringstream svg;
     };
 
     struct BusRequest{
@@ -83,19 +85,18 @@ namespace data_handler{
 
     struct RetRequest{
 		int id;
-		size_t index;
 		std::string type;
 		std::string name;
 		std::string from;
 		std::string to;
     };
 
-	struct RoutAnswer{
-		int id;
-		bool full;
-		double speed;
-		double wait_time;
-		double all_time_go;
+	struct RoutResponse{
+		int id = 0;
+		bool full = false;
+		double speed = 0.0;
+		double wait_time = 0.0;
+		double all_time_go = 0.0;
 		std::string massage;
 		std::string type;
 		std::string name;
@@ -107,15 +108,23 @@ namespace data_handler{
 		std::vector<int> bus_stop_count;
 	};
 
-
     struct BusCollect{
 		std::vector<std::string_view> stops;
 		std::vector<geo_math::Coordinates> cordinates;
 		int color_number = 0;
     }; 
 
-	
-
-
-	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, MapRequest, RoutAnswer>;
+	using AllInfo = std::variant<std::monostate, std::pair<data_bus::InfoBus, int>, std::pair<data_bus::InfoStop, int>, MapRequest, RoutResponse>;
 }
+
+namespace transport_router{
+	struct AdgeInfo {
+        int stop_count = 0;
+        std::string_view bus_name;
+        std::string_view first_stop;
+    };
+
+	using EdgeIter = std::vector<size_t>::iterator;
+	using StopIter = std::vector<std::string_view>::iterator;
+}
+

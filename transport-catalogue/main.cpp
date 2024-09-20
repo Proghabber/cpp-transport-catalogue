@@ -11,11 +11,10 @@ int main() {
     readJson::JsonReader readders;
     catalogue::TransportCatalogue transport;
     render::SvgMaker make;
-    handler::RequestHandler handl(transport,make);
+    transport_router::Transport_Router router(transport);
+    handler::RequestHandler handl(transport, make, readders, router);
+    handl.ReadJson(std::cin);
+    handl.ReturnJson(std::cout);
 
-    readders.ParseRequests(std::cin, handl);
-    transport_router::Transport_Router<double> router(handl);
-    router.FindPath();
-    readders.Print(std::cout, handl);
     return 0;
 }
