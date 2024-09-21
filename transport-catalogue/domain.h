@@ -61,7 +61,7 @@ namespace data_bus{
 }
 
 namespace data_handler{
-	struct MapRequest{
+	struct MapRequest{// ?
 		int id;
 		bool answer;
 		std::ostringstream svg;
