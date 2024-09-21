@@ -115,7 +115,7 @@ namespace data_handler{
 }
 
 namespace transport_router{
-	struct RouteParameters{
+	struct RouteParameters{ //?
         int bus_wait_time = 0;
 		double bus_velocity = 0;
     };
