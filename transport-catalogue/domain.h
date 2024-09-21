@@ -61,7 +61,7 @@ namespace data_bus{
 }
 
 namespace data_handler{
-	struct MapRequest{// what?
+	struct MapRequest{
 		int id;
 		bool answer;
 		std::ostringstream svg;
@@ -92,7 +92,7 @@ namespace data_handler{
 		std::string to;
     };
 
-	struct RouteSearchResponse{ // what?
+	struct RouteSearchResponse{ 
 		bool full = false;
 		double speed = 0.0;
 		double wait_time = 0.0;
