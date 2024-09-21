@@ -52,7 +52,7 @@ namespace data_bus{
 	};
 
 	using BusMap = std::map<std::string_view, data_bus::Bus>;
-    using StopMap = std::map<std::string_view, data_bus::Stop*>;
+	using StopMap = std::map<std::string_view, data_bus::Stop*>;
 	using CollectBus = std::unordered_map<std::string_view, data_bus::Bus>;// хранит структуры маршрутов
 	using CollectStops = std::unordered_map<std::string_view, data_bus::Stop*>;// словарь ключ - остановка значение - указатель на структуру этой установки
 	using BusRout = std::unordered_map<std::string_view,std::vector<std::string_view>>;// словарь ключ - название маршрута значение -  вектор остановок этого марщрута
@@ -92,7 +92,7 @@ namespace data_handler{
 		std::string to;
     };
 
-	struct RouteSearchResponse{
+	struct RouteSearchResponse{ // what?
 		bool full = false;
 		double speed = 0.0;
 		double wait_time = 0.0;
